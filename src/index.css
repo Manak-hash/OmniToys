@@ -1,7 +1,78 @@
 @import "tailwindcss";
 
+@theme {
+  --color-omni-bg: #252826;
+  --color-omni-text: #f5f5f8;
+  --color-omni-primary: #df1c26;
+  --color-omni-primary-hover: #b8161f;
+  
+  --font-mono: 'Space Mono', 'Roboto Mono', monospace;
+  --font-sans: 'Outfit', sans-serif;
+}
+
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-50 antialiased;
+    background-color: var(--color-omni-bg);
+    color: var(--color-omni-text);
+    font-family: var(--font-sans);
+    @apply antialiased selection:bg-omni-primary/30 selection:text-white min-h-screen overflow-x-hidden;
   }
+
+  h1, h2, h3, h4, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .mesh-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: var(--color-omni-bg);
+  }
+
+  .mesh-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.15;
+    animation: float 20s infinite ease-in-out;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 40px) scale(0.9); }
+  }
+
+  .glass-card {
+    @apply bg-omni-bg/40 backdrop-blur-xl border border-omni-text/10 shadow-2xl;
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(223, 28, 38, 0.2), 0 0 40px rgba(223, 28, 38, 0.1);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px rgba(223, 28, 38, 0.5);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-omni-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-omni-primary);
 }

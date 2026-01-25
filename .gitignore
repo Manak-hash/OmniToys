@@ -8,9 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+# Laboratory Artifacts
 dist
+dev-dist
 dist-ssr
-*.local
+.rollup.cache
+*.wasm.map
 
 # Editor directories and files
 .vscode/*
