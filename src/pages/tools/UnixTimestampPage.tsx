@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { Clock, Copy, RefreshCw, Calendar, Globe } from 'lucide-react'
 import { toast } from 'sonner'
@@ -19,28 +19,31 @@ const FORMATS = [
 ]
 
 export default function UnixTimestampPage() {
-  const [timestamp, setTimestamp] = useState(Math.floor(Date.now() / 1000))
+  const [timestamp, setTimestamp] = useState(() => Math.floor(Date.now() / 1000))
   const [isLive, setIsLive] = useState(true)
   const [timezone, setTimezone] = useState('local')
   const [format, setFormat] = useState<'seconds' | 'milliseconds'>('seconds')
   const [customDate, setCustomDate] = useState('')
   const [customTime, setCustomTime] = useState('')
+  const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
+
+  const getDate = useCallback(() => new Date(timestamp * 1000), [timestamp])
 
   useEffect(() => {
-    if (!isLive) return
     const interval = setInterval(() => {
-      setTimestamp(Math.floor(Date.now() / 1000))
+      const currentNow = Math.floor(Date.now() / 1000)
+      setNow(currentNow)
+      if (isLive) {
+        setTimestamp(currentNow)
+      }
     }, 1000)
     return () => clearInterval(interval)
   }, [isLive])
-
-  const getDate = () => new Date(timestamp * 1000)
 
   const handleTimestampChange = (val: string) => {
     setIsLive(false)
     const parsed = parseInt(val, 10)
     if (!isNaN(parsed)) {
-      // Handle milliseconds input
       if (format === 'milliseconds') {
         setTimestamp(Math.floor(parsed / 1000))
       } else {
@@ -48,20 +51,6 @@ export default function UnixTimestampPage() {
       }
     }
   }
-
-  const handleDateTimeChange = () => {
-    if (!customDate) return
-    setIsLive(false)
-    const dateStr = `${customDate}T${customTime || '00:00'}`
-    const date = new Date(dateStr)
-    if (!isNaN(date.getTime())) {
-      setTimestamp(Math.floor(date.getTime() / 1000))
-    }
-  }
-
-  useEffect(() => {
-    handleDateTimeChange()
-  }, [customDate, customTime])
 
   const copy = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
@@ -83,8 +72,8 @@ export default function UnixTimestampPage() {
     return date.toLocaleString('en-US', { timeZone: tz })
   }
 
-  const getRelative = () => {
-    const diff = Math.floor(Date.now() / 1000) - timestamp
+  const getRelative = useCallback(() => {
+    const diff = now - timestamp
     const abs = Math.abs(diff)
     const future = diff < 0
 
@@ -94,7 +83,7 @@ export default function UnixTimestampPage() {
     if (abs < 2592000) return `${Math.floor(abs / 86400)}d ${future ? 'from now' : 'ago'}`
     if (abs < 31536000) return `${Math.floor(abs / 2592000)}mo ${future ? 'from now' : 'ago'}`
     return `${Math.floor(abs / 31536000)}y ${future ? 'from now' : 'ago'}`
-  }
+  }, [now, timestamp])
 
   const displayTimestamp = format === 'milliseconds' ? timestamp * 1000 : timestamp
 
@@ -113,9 +102,7 @@ export default function UnixTimestampPage() {
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[500px]">
-        {/* Left Column - Input */}
         <div className="space-y-6">
-          {/* Live Indicator */}
           {isLive && (
             <div className="flex items-center justify-center gap-2 text-green-400 text-sm p-2 bg-green-400/10 rounded-lg">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
@@ -123,7 +110,6 @@ export default function UnixTimestampPage() {
             </div>
           )}
 
-          {/* Format Toggle */}
           <div className="flex gap-2">
             {FORMATS.map(f => (
               <button
@@ -140,7 +126,6 @@ export default function UnixTimestampPage() {
             ))}
           </div>
 
-          {/* Timestamp Input */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-omni-text/70 flex items-center gap-2">
               <Clock className="w-4 h-4" />
@@ -162,7 +147,6 @@ export default function UnixTimestampPage() {
             </div>
           </div>
 
-          {/* Date/Time Input */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-omni-text/70 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -172,20 +156,37 @@ export default function UnixTimestampPage() {
               <input
                 type="date"
                 value={customDate || getDate().toISOString().split('T')[0]}
-                onChange={(e) => { setCustomDate(e.target.value); setIsLive(false); }}
+                onChange={(e) => { 
+                   const val = e.target.value;
+                   setCustomDate(val); 
+                   setIsLive(false);
+                   const dateStr = `${val}T${customTime || '00:00'}`;
+                   const date = new Date(dateStr);
+                   if (!isNaN(date.getTime())) {
+                      setTimestamp(Math.floor(date.getTime() / 1000));
+                   }
+                }}
                 className="p-3 bg-omni-bg/50 border border-omni-text/10 rounded-xl text-omni-text font-mono focus:outline-none focus:ring-2 focus:ring-omni-primary/50"
               />
               <input
                 type="time"
                 step="1"
                 value={customTime || getDate().toTimeString().slice(0, 8)}
-                onChange={(e) => { setCustomTime(e.target.value); setIsLive(false); }}
+                onChange={(e) => { 
+                   const val = e.target.value;
+                   setCustomTime(val); 
+                   setIsLive(false);
+                   const dateStr = `${customDate || getDate().toISOString().split('T')[0]}T${val}`;
+                   const date = new Date(dateStr);
+                   if (!isNaN(date.getTime())) {
+                      setTimestamp(Math.floor(date.getTime() / 1000));
+                   }
+                }}
                 className="p-3 bg-omni-bg/50 border border-omni-text/10 rounded-xl text-omni-text font-mono focus:outline-none focus:ring-2 focus:ring-omni-primary/50"
               />
             </div>
           </div>
 
-          {/* Timezone Selector */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-omni-text/70 flex items-center gap-2">
               <Globe className="w-4 h-4" />
@@ -209,9 +210,7 @@ export default function UnixTimestampPage() {
           </div>
         </div>
 
-        {/* Right Column - Output */}
         <div className="space-y-4">
-          {/* Format Cards */}
           <FormatCard 
             label="Relative" 
             value={getRelative()} 

@@ -1,13 +1,17 @@
 import { useState } from 'react'
-import { Settings, Moon, Sun, Bell, Shield, Info, ExternalLink, Github, Palette } from 'lucide-react'
+import { ToolLayout } from '@/components/tools/ToolLayout'
+import { 
+  Shield, Bell, Database, 
+  Monitor, Palette, Info, ExternalLink, Github, Settings 
+} from 'lucide-react'
 import { usePreferences } from '@/store/preferences'
 import { motion } from 'framer-motion'
 
-function SettingSection({ title, children }: { title: string, children: React.ReactNode }) {
+function Section({ title, children }: { title: string, children: React.ReactNode }) {
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-omni-text/60 uppercase tracking-wider">{title}</h3>
-      <div className="bg-omni-bg/50 border border-omni-text/10 rounded-xl divide-y divide-omni-text/5">
+    <div className="space-y-4">
+      <h3 className="text-sm font-black uppercase tracking-widest text-omni-text/20 ml-1">{title}</h3>
+      <div className="glass-card rounded-[32px] overflow-hidden">
         {children}
       </div>
     </div>
@@ -22,13 +26,13 @@ function SettingRow({ icon: Icon, title, description, children }: {
 }) {
   return (
     <div className="flex items-center justify-between p-4 gap-4">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-omni-text/5 rounded-lg">
-          <Icon className="w-5 h-5 text-omni-text/60" />
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-2xl bg-omni-text/5 flex items-center justify-center text-omni-text/40">
+          <Icon className="w-5 h-5" />
         </div>
         <div>
-          <p className="font-medium text-omni-text">{title}</p>
-          {description && <p className="text-sm text-omni-text/50">{description}</p>}
+          <h4 className="font-bold text-omni-text">{title}</h4>
+          {description && <p className="text-xs text-omni-text/40">{description}</p>}
         </div>
       </div>
       {children}
@@ -38,7 +42,7 @@ function SettingRow({ icon: Icon, title, description, children }: {
 
 function Toggle({ checked, onChange }: { checked: boolean, onChange: (v: boolean) => void }) {
   return (
-    <button
+    <button 
       onClick={() => onChange(!checked)}
       className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-omni-primary' : 'bg-omni-text/20'}`}
     >
@@ -52,91 +56,102 @@ function Toggle({ checked, onChange }: { checked: boolean, onChange: (v: boolean
 }
 
 export default function SettingsPage() {
-  const { theme, toggleTheme, favorites } = usePreferences()
+  const { 
+    clearFavorites, 
+    lowDataMode, setLowDataMode,
+    vibrationEnabled, setVibrationEnabled 
+  } = usePreferences()
   const [notifications, setNotifications] = useState(true)
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 pb-20">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-omni-text font-['Space_Mono'] flex items-center gap-3">
-          <Settings className="w-8 h-8" />
-          Settings
-        </h1>
-        <p className="text-omni-text/60">Customize your OmniToys experience</p>
-      </div>
-
-      <SettingSection title="Appearance">
-        <SettingRow 
-          icon={Palette} 
-          title="Lab Presets" 
-          description="Switch between specialized laboratory themes"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] px-2 py-0.5 bg-omni-primary/10 text-omni-primary rounded-full font-black uppercase tracking-widest">SOON</span>
-            <div className="w-12 h-6 rounded-full bg-omni-text/10 cursor-not-allowed opacity-50 relative">
-               <div className="absolute top-1 left-1 w-4 h-4 bg-white/20 rounded-full" />
-            </div>
-          </div>
-        </SettingRow>
-      </SettingSection>
-
-      <SettingSection title="Notifications">
-        <SettingRow 
-          icon={Bell} 
-          title="Update Notifications" 
-          description="Get notified when new versions are available"
-        >
-          <Toggle checked={notifications} onChange={setNotifications} />
-        </SettingRow>
-      </SettingSection>
-
-      <SettingSection title="Privacy">
-        <SettingRow 
-          icon={Shield} 
-          title="Local-Only Processing" 
-          description="All data stays on your device"
-        >
-          <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-full">Always On</span>
-        </SettingRow>
-      </SettingSection>
-
-      <SettingSection title="About">
-        <SettingRow 
-          icon={Info} 
-          title="Version" 
-          description="Current app version"
-        >
-          <span className="text-sm text-omni-text/60 font-mono">v0.2.5</span>
-        </SettingRow>
-        <SettingRow 
-          icon={Github} 
-          title="Source Code" 
-          description="View on GitHub"
-        >
-          <a 
-            href="https://github.com/Manak-hash/OmniToys" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-omni-primary hover:underline text-sm"
+    <ToolLayout
+      title="System Configuration"
+      description="Fine-tune your lab environment and data persistence settings."
+      icon={<Settings className="w-8 h-8" />}
+    >
+      <div className="max-w-3xl mx-auto space-y-10 pb-20">
+        <Section title="Interface & Experience">
+          <SettingRow 
+            icon={Palette} 
+            title="Appearance" 
+            description="System theme is automatically synced with your OS."
           >
-            Open <ExternalLink className="w-3 h-3" />
-          </a>
-        </SettingRow>
-      </SettingSection>
+            <span className="text-[10px] font-black uppercase tracking-widest text-omni-text/20 bg-omni-text/5 px-3 py-1 rounded-full">AUTO_SYNC</span>
+          </SettingRow>
+          
+          <div className="h-px bg-omni-text/5 mx-4" />
+          
+          <SettingRow 
+            icon={Monitor} 
+            title="Low Data Mode" 
+            description="Disable non-critical animations and heavy effects."
+          >
+            <Toggle checked={lowDataMode} onChange={setLowDataMode} />
+          </SettingRow>
 
-      {favorites.length > 0 && (
-        <SettingSection title="Your Favorites">
-          <div className="p-4">
-            <div className="flex flex-wrap gap-2">
-              {favorites.map(fav => (
-                <span key={fav} className="px-3 py-1 bg-omni-primary/10 text-omni-primary text-sm rounded-full">
-                  {fav}
-                </span>
-              ))}
-            </div>
+          <div className="h-px bg-omni-text/5 mx-4" />
+
+          <SettingRow 
+            icon={Shield} 
+            title="Haptic Feedback" 
+            description="Subtle vibrations for critical system interactions."
+          >
+            <Toggle checked={vibrationEnabled} onChange={setVibrationEnabled} />
+          </SettingRow>
+        </Section>
+
+        <Section title="Laboratory Communications">
+          <SettingRow 
+            icon={Bell} 
+            title="Process Notifications" 
+            description="Get alerted when long-running Wasm tasks complete."
+          >
+            <Toggle checked={notifications} onChange={setNotifications} />
+          </SettingRow>
+        </Section>
+
+        <Section title="Storage & Persistence">
+          <SettingRow 
+            icon={Database} 
+            title="Local Cache" 
+            description="Clear all favorites and tool history from this browser."
+          >
+            <button 
+              onClick={clearFavorites}
+              className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors"
+            >
+              Flush Data
+            </button>
+          </SettingRow>
+        </Section>
+
+        <Section title="Protocol Info">
+          <div className="p-6 space-y-4">
+             <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <Info className="w-5 h-5 text-omni-text/20" />
+                   <span className="text-sm font-bold text-omni-text">Project Version</span>
+                </div>
+                <span className="font-mono text-xs text-omni-text/40">v0.2.5 (BETA_LAB)</span>
+             </div>
+             <div className="h-px bg-omni-text/5" />
+             <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                   <Github className="w-5 h-5 text-omni-text/20" />
+                   <span className="text-sm font-bold text-omni-text">Source Repository</span>
+                </div>
+                <a href="https://github.com/Manak-hash/OmniToys" target="_blank" rel="noreferrer" className="text-omni-primary hover:underline text-xs flex items-center gap-1 font-bold">
+                   GitHub <ExternalLink className="w-3 h-3" />
+                </a>
+             </div>
           </div>
-        </SettingSection>
-      )}
-    </div>
+        </Section>
+
+        <div className="text-center space-y-2 opacity-20">
+           <p className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">OmniToys Lab Environment</p>
+           <p className="text-[8px] font-medium leading-relaxed max-w-xs mx-auto">All tools run locally via WASM or client-side JS. No tracking. No telemetry. Pure efficiency.</p>
+        </div>
+      </div>
+    </ToolLayout>
   )
 }

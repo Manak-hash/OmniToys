@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { 
   FileJson, Hash, Palette, FileImage, Shield, FileText, Code2, Layers, QrCode, Calculator, Type,
   Sparkles, PenTool, Smartphone, Globe, Clock, Terminal, FileCode, Binary, Lock, Timer, Eye, Database,
-  Scissors, Eraser, Ratio, Star, Cpu, BookOpen, Radio, FileAudio, Diff, FileSearch, Monitor, Braces
+  Scissors, Eraser, Ratio, Cpu, BookOpen, Radio, FileAudio, Diff, FileSearch, Monitor, Braces
 } from 'lucide-react'
 import React from 'react'
 
@@ -20,7 +20,7 @@ export interface Tool {
 }
 
 // Helper to ensure icons are stable React elements
-const createIcon = (Icon: any) => React.createElement(Icon, { className: "w-5 h-5" })
+const createIcon = (Icon: React.ComponentType<{ className?: string }>) => React.createElement(Icon, { className: "w-5 h-5" })
 
 export const ALL_TOOLS: Tool[] = [
   // Web Design & UI

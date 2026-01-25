@@ -1,12 +1,11 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { CodeEditor } from '@/components/ui/CodeEditor'
-import { PenTool, Copy, Check, Scissors, Eraser, Layers } from 'lucide-react'
+import { PenTool, Copy, Check, Scissors, Layers } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function SvgOptimizerPage() {
   const [input, setInput] = useState('<svg width="100" height="100" viewBox="0 0 100 100">\n  <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />\n</svg>')
-  const [output, setOutput] = useState('')
   const [options, setOptions] = useState({
     removeComments: true,
     removeMetadata: true,
@@ -15,8 +14,8 @@ export default function SvgOptimizerPage() {
     prettyPrint: false,
   })
 
-  const optimizeSvg = useCallback((svg: string) => {
-    let result = svg
+  const output = useMemo(() => {
+    let result = input
 
     if (options.removeComments) {
       result = result.replace(/<!--[\s\S]*?-->/g, '')
@@ -30,8 +29,7 @@ export default function SvgOptimizerPage() {
     }
 
     if (options.minifyPaths) {
-      // Basic path minification (remove extra spaces)
-      result = result.replace(/d="([^"]+)"/g, (match, path) => {
+      result = result.replace(/d="([^"]+)"/g, (_, path) => {
         const minified = path.replace(/\s+/g, ' ').trim()
         return `d="${minified}"`
       })
@@ -41,20 +39,14 @@ export default function SvgOptimizerPage() {
       result = result.replace(/\s(width|height)="[^"]*"/g, '')
     }
 
-    // Minify whitespace if not pretty printing
     if (!options.prettyPrint) {
       result = result.replace(/>\s+</g, '><').trim()
     } else {
-      // Very basic pretty print
       result = result.replace(/>/g, '>\n').replace(/\n\n/g, '\n')
     }
 
-    setOutput(result)
-  }, [options])
-
-  useEffect(() => {
-    optimizeSvg(input)
-  }, [input, options, optimizeSvg])
+    return result
+  }, [input, options])
 
   const copyOutput = () => {
     navigator.clipboard.writeText(output)
@@ -85,8 +77,6 @@ export default function SvgOptimizerPage() {
       }
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full min-h-[600px]">
-        
-        {/* Input & Options Column */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2 flex-1">
             <label className="text-sm font-medium text-omni-text/70">Raw SVG Input</label>
@@ -124,7 +114,6 @@ export default function SvgOptimizerPage() {
           </div>
         </div>
 
-        {/* Preview & Output Column */}
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2 h-1/2">
             <label className="text-sm font-medium text-omni-text/70">Visualization</label>
@@ -147,7 +136,6 @@ export default function SvgOptimizerPage() {
             />
           </div>
         </div>
-
       </div>
     </ToolLayout>
   )

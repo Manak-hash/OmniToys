@@ -18,10 +18,23 @@ export default function CompressorPage() {
   const [level, setLevel] = useState<CompressionLevel>(6)
   const [showOptions, setShowOptions] = useState(false)
 
+  const formatSize = (bytes: number) => {
+    if (bytes === 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
   const handleFileSelect = (uploadedFile: File) => {
     setFile(uploadedFile)
     setResult(null)
     setProgress(0)
+  }
+
+  const handleDownload = () => {
+    if (!result) return
+    fileDownload(result.data, result.name)
   }
 
   const compressFile = useCallback(async () => {
@@ -39,12 +52,10 @@ export default function CompressorPage() {
       let outputName: string
       let compressedData: Uint8Array
 
-      // Use streaming for large files (>10MB)
       const isLarge = file.size > 10 * 1024 * 1024
 
       if (format === 'zip') {
         outputName = `${file.name}.zip`
-        // Create zip with the file inside
         const zipData = await new Promise<Uint8Array>((resolve, reject) => {
           fflate.zip(
             { [file.name]: fileBuffer },
@@ -60,7 +71,6 @@ export default function CompressorPage() {
         outputName = `${file.name}.gz`
         compressedData = await new Promise<Uint8Array>((resolve, reject) => {
           if (isLarge) {
-            // Streaming compression for large files
             const chunks: Uint8Array[] = []
             const gzip = new fflate.Gzip({ level }, (chunk, isLast) => {
               chunks.push(chunk)
@@ -74,7 +84,7 @@ export default function CompressorPage() {
               }
             })
             
-            const chunkSize = 1024 * 1024 // 1MB chunks
+            const chunkSize = 1024 * 1024
             for (let i = 0; i < fileBuffer.length; i += chunkSize) {
               const end = Math.min(i + chunkSize, fileBuffer.length)
               gzip.push(fileBuffer.subarray(i, end), end >= fileBuffer.length)
@@ -111,25 +121,13 @@ export default function CompressorPage() {
       const savedBytes = file.size - compressedData.length
       toast.success(`Compressed! Saved ${savedPercent}% (${formatSize(savedBytes)})`)
       
-    } catch (e) {
-      console.error(e)
+    } catch {
+      console.error('Compression failed')
       toast.error('Compression failed', { id: toastId })
       setIsCompressing(false)
     }
+    // Finalize the effects
   }, [file, format, level])
-
-  const handleDownload = () => {
-    if (!result) return
-    fileDownload(result.data, result.name)
-  }
-
-  const formatSize = (bytes: number) => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
 
   const compressionRatio = result && file ? (100 - (result.size / file.size * 100)).toFixed(1) : 0
 
@@ -140,8 +138,6 @@ export default function CompressorPage() {
       icon={<FileText className="w-8 h-8" />}
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full min-h-[500px]">
-        
-        {/* Upload Column */}
         <div className="flex flex-col gap-6">
           {!file ? (
             <FileUploader 
@@ -160,7 +156,6 @@ export default function CompressorPage() {
                 <p className="text-omni-text/60">{formatSize(file.size)} - {file.type || 'Unknown Type'}</p>
               </div>
 
-              {/* Options Toggle */}
               <button
                 onClick={() => setShowOptions(!showOptions)}
                 className="flex items-center gap-2 text-sm text-omni-text/60 hover:text-omni-primary transition-colors"
@@ -169,7 +164,6 @@ export default function CompressorPage() {
                 {showOptions ? 'Hide' : 'Show'} Options
               </button>
 
-              {/* Options */}
               {showOptions && (
                 <div className="w-full space-y-4 p-4 bg-omni-bg/50 rounded-lg border border-omni-text/5">
                   <div className="space-y-2">
@@ -211,7 +205,6 @@ export default function CompressorPage() {
                 </div>
               )}
 
-              {/* Progress Bar */}
               {isCompressing && (
                 <div className="w-full space-y-2">
                   <div className="h-2 bg-omni-text/10 rounded-full overflow-hidden">
@@ -248,7 +241,6 @@ export default function CompressorPage() {
           )}
         </div>
 
-        {/* Results Column */}
         <div className="flex flex-col gap-6 justify-center">
           {result ? (
             <div className="bg-omni-bg/80 border border-omni-primary/30 rounded-xl p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
@@ -295,7 +287,6 @@ export default function CompressorPage() {
             </div>
           )}
         </div>
-
       </div>
     </ToolLayout>
   )

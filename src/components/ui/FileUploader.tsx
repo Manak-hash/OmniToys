@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Upload, X, File as FileIcon } from 'lucide-react'
+import { Upload, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/utils/cn'
 
@@ -31,7 +31,7 @@ export function FileUploader({
     }
   }, [])
 
-  const validateAndUpload = (file: File) => {
+  const validateAndUpload = useCallback((file: File) => {
     setError(null)
     
     // Check type if accept is provided (simple check)
@@ -46,7 +46,7 @@ export function FileUploader({
     }
 
     onFileSelect(file)
-  }
+  }, [accept, maxSizeMB, onFileSelect])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -56,10 +56,9 @@ export function FileUploader({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       validateAndUpload(e.dataTransfer.files[0])
     }
-  }, [maxSizeMB, accept])
+  }, [validateAndUpload])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
     if (e.target.files && e.target.files[0]) {
       validateAndUpload(e.target.files[0])
     }

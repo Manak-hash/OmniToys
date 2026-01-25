@@ -22,7 +22,7 @@ export default function JsonToTsPage() {
       const json = JSON.parse(val)
       const interfaces = JsonToTs(json)
       setOutput(interfaces.join('\n\n'))
-    } catch (e) {
+    } catch {
       // Logic for live-error could go here if non-distracting
     }
   }

@@ -27,7 +27,7 @@ export default function Base64Page() {
       } else {
         setOutput(decodeURIComponent(escape(atob(value))))
       }
-    } catch (e) {
+    } catch {
       setError('Invalid input for ' + (currentMode === 'encode' ? 'encoding' : 'decoding'))
       setOutput('')
     }

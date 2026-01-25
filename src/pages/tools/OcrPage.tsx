@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { FileUploader } from '@/components/ui/FileUploader'
 import { Scan, Copy, RefreshCw, FileText, Loader2, Zap, Scissors, X, Check } from 'lucide-react'

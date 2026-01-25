@@ -3,6 +3,15 @@ import { motion } from 'framer-motion'
 import { Rocket, Shield, Zap, Layout, ArrowRight, Github, Terminal } from 'lucide-react'
 import type { ReactNode } from 'react'
 
+interface FloatingIconProps {
+  icon: ReactNode
+  top?: string
+  left?: string
+  right?: string
+  bottom?: string
+  delay: number
+}
+
 export default function HomePage() {
   return (
     <div className="space-y-32 py-10">
@@ -37,7 +46,7 @@ export default function HomePage() {
             My personal playground of high-performance dev tools. <br className="hidden md:block" />
             Zero tracking. 100% Client-side. Built for speed.
           </p>
-
+38: 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
             <Link 
               to="/tools" 
@@ -154,7 +163,7 @@ function TechBrand({ name }: { name: string }) {
   )
 }
 
-function FloatingIcon({ icon, top, left, right, bottom, delay }: any) {
+function FloatingIcon({ icon, top, left, right, bottom, delay }: FloatingIconProps) {
   return (
     <motion.div
       initial={{ y: 0 }}

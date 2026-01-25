@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
-import { Copy, RefreshCw, Layers, Sun, Moon, Plus, Trash2 } from 'lucide-react'
+import { Copy, RefreshCw, Layers, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { CodeEditor } from '@/components/ui/CodeEditor'
 
@@ -20,8 +20,6 @@ export default function ShadowBuilderPage() {
     { id: '1', x: 0, y: 10, blur: 20, spread: -5, color: '#000000', opacity: 0.3, inset: false }
   ])
   const [activeLayerId, setActiveLayerId] = useState('1')
-  const [isNeumorphic, setIsNeumorphic] = useState(false)
-  const [cardProgress, setCardProgress] = useState(0) // For neumorphism intensity
 
   const shadowString = useMemo(() => {
     return layers.map(l => {

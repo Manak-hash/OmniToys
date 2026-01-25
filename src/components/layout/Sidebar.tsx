@@ -1,7 +1,7 @@
 import { NavLink, Link } from 'react-router-dom'
 import { 
   Home, Layout, Settings, 
-  Github, Menu, X, Rocket, Terminal, Pin, History, FlaskConical
+  Github, Menu, X, Terminal, FlaskConical
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import logo from '@/assets/icons/OmniToys.png'

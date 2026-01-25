@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { FileUploader } from '@/components/ui/FileUploader'
-import { Palette, Share2, Copy } from 'lucide-react'
+import { Palette, Copy } from 'lucide-react'
 import ColorThief from 'colorthief'
 import { toast } from 'sonner'
 
@@ -33,8 +33,8 @@ export default function PaletteExtractorPage() {
         const pal = colorThief.getPalette(imgRef.current, 10)
         setDominant(dom)
         setPalette(pal)
-    } catch (e) {
-        console.error('Error extracting colors', e)
+    } catch {
+        console.error('Error extracting colors')
         toast.error("Could not extract colors. Image might be too complex or corrupted.")
     }
   }
@@ -56,8 +56,6 @@ export default function PaletteExtractorPage() {
       icon={<Palette className="w-8 h-8" />}
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full min-h-[500px]">
-        
-        {/* Upload & Preview Column */}
         <div className="flex flex-col gap-6">
             {!imageSrc ? (
                 <FileUploader 
@@ -85,7 +83,6 @@ export default function PaletteExtractorPage() {
             )}
         </div>
 
-        {/* Results Column */}
         <div className="flex flex-col gap-8">
             {dominant && (
                 <div className="space-y-3">
@@ -139,7 +136,6 @@ export default function PaletteExtractorPage() {
                 </div>
             )}
         </div>
-
       </div>
     </ToolLayout>
   )

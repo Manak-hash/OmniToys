@@ -17,8 +17,10 @@ export default function RegexTesterPage() {
       const regex = new RegExp(pattern, flags)
       const matches = Array.from(text.matchAll(regex))
       return { matches, error: null }
-    } catch (e) {
-      return { matches: [], error: (e as Error).message }
+    } catch {
+      // If 'e' is not captured, we can't access its message directly.
+      // Returning a generic error message or null for the error.
+      return { matches: [], error: 'Invalid regular expression' }
     }
   }, [pattern, flags, text])
 
