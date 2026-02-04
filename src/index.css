@@ -5,9 +5,10 @@
   --color-omni-text: #f5f5f8;
   --color-omni-primary: #df1c26;
   --color-omni-primary-hover: #b8161f;
-  
-  --font-mono: 'Space Mono', 'Roboto Mono', monospace;
-  --font-sans: 'Outfit', sans-serif;
+  --color-omni-accent: #4d9fff;
+
+  --font-mono: "Space Mono", "Roboto Mono", monospace;
+  --font-sans: "Outfit", sans-serif;
 }
 
 @layer base {
@@ -18,7 +19,11 @@
     @apply antialiased selection:bg-omni-primary/30 selection:text-white min-h-screen overflow-x-hidden;
   }
 
-  h1, h2, h3, h4, .font-mono {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-mono {
     font-family: var(--font-mono);
   }
 }
@@ -44,21 +49,42 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 40px) scale(0.9); }
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 40px) scale(0.9);
+    }
   }
 
   .glass-card {
-    @apply bg-omni-bg/40 backdrop-blur-xl border border-omni-text/10 shadow-2xl;
+    @apply bg-omni-bg/40 backdrop-blur-xl border border-omni-text/10 shadow-2xl transition-all duration-500 hover:scale-[1.01] hover:border-omni-primary/20;
   }
 
   .neon-glow {
-    box-shadow: 0 0 20px rgba(223, 28, 38, 0.2), 0 0 40px rgba(223, 28, 38, 0.1);
+    box-shadow:
+      0 0 20px rgba(223, 28, 38, 0.2),
+      0 0 40px rgba(223, 28, 38, 0.1);
+  }
+
+  .neon-glow-primary {
+    box-shadow: 0 0 20px rgba(223, 28, 38, 0.4);
+  }
+
+  .neon-glow-accent {
+    box-shadow: 0 0 20px rgba(77, 159, 255, 0.4);
   }
 
   .neon-text {
     text-shadow: 0 0 10px rgba(223, 28, 38, 0.5);
+  }
+
+  .neon-text-accent {
+    text-shadow: 0 0 10px rgba(77, 159, 255, 0.5);
   }
 }
 
@@ -75,4 +101,21 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-omni-primary);
+}
+
+@keyframes dataStream {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 0.15; }
+  90% { opacity: 0.15; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.data-stream {
+  position: fixed;
+  width: 2px;
+  height: 100px;
+  background: linear-gradient(to bottom, transparent, var(--omni-primary), transparent);
+  animation: dataStream 8s linear infinite;
+  pointer-events: none;
+  z-index: 0;
 }

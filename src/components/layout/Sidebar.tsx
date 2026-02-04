@@ -1,9 +1,10 @@
 import { NavLink, Link } from 'react-router-dom'
-import { 
-  Home, Layout, Settings, 
-  Github, Menu, X, Terminal, FlaskConical
+import {
+  Home, Layout, Settings,
+  Github, X, Terminal, FlaskConical
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import logo from '@/assets/icons/OmniToys.png'
 import { usePreferences } from '@/store/preferences'
 import { ALL_TOOLS } from '@/constants/tools'
@@ -24,12 +25,15 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile Toggle */}
-      <button 
+      {/* Mobile Terminal Toggle */}
+      <motion.button 
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 right-4 z-50 p-2 bg-omni-bg/40 backdrop-blur-xl border border-white/10 rounded-xl text-omni-text shadow-2xl shadow-black/50"
+        className="lg:hidden fixed bottom-8 right-8 z-50 p-4 bg-omni-primary text-white rounded-2xl shadow-[0_0_30px_rgba(223,28,38,0.4)] flex items-center justify-center border border-white/20"
       >
-        {isOpen ? <X /> : <Menu />}
-      </button>
+        {isOpen ? <X className="w-6 h-6" /> : <Terminal className="w-6 h-6" />}
+      </motion.button>
 
       {/* Sidebar Container */}
       <aside className={`
@@ -164,7 +168,7 @@ export function Sidebar() {
                <div className="relative z-10 space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                    <span className="text-omni-text/30 font-mono">Synthesis</span>
-                   <span className="text-omni-primary neon-text font-mono">12/45 UNIT</span>
+                   <span className="text-omni-primary neon-text font-mono">24/45 UNIT</span>
                  </div>
                  <div className="h-1 bg-white/5 rounded-full overflow-hidden flex">
                    <div className="h-full bg-omni-primary neon-glow-primary w-[26%] transition-all duration-1000 ease-in-out" />
@@ -172,7 +176,7 @@ export function Sidebar() {
                  <div className="flex items-center gap-2.5 text-[9px] text-omni-text/40 font-black uppercase tracking-[0.1em] font-mono">
                    <div className="flex items-center gap-1.5">
                      <div className="w-1.5 h-1.5 bg-omni-primary rounded-full" />
-                     <span>v0.2.5_BETA</span>
+                     <span>v0.2.12</span>
                    </div>
                    <span className="w-px h-2 bg-white/10" />
                    <span className="text-omni-text/20 font-bold">NODE_01</span>

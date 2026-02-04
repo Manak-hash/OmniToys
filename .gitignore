@@ -31,5 +31,22 @@ dist-ssr
 .env.local
 .env.development.local
 
+# WASM build artifacts (generated from src/cpp/*)
+public/wasm/
+*.wasm
+*.wasm.map
+
+# Emscripten SDK (local C++ to WASM compiler)
+emsdk/
+
+# Build logs
+build_log.txt
+*.log
+
 # Mine (do not delete)
 /Docs-Perso
+CLAUDE.md
+/.claude
+/mcp-servers
+*.bat
+nul

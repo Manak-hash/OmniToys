@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Rocket, Shield, Zap, Layout, ArrowRight, Github, Terminal } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 
 interface FloatingIconProps {
   icon: ReactNode
@@ -11,8 +12,67 @@ interface FloatingIconProps {
   bottom?: string
   delay: number
 }
+const bootMessages = [
+  "> INITIALIZING OMNI_PROTOCOL...",
+  "> LOADING WASM MODULES...",
+  "> ESTABLISHING SECURE CONNECTION...",
+  "> BYPASSING FIREWALLS...",
+  "> DECRYPTING TOOLS DATABASE...",
+  "> SYSTEM READY."
+]
 
 export default function HomePage() {
+  const [bootComplete, setBootComplete] = useState(false)
+  const [typedText, setTypedText] = useState("")
+
+  useEffect(() => {
+    const totalDuration = bootMessages.length * 300 + 500
+    const timer = setTimeout(() => setBootComplete(true), totalDuration)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!bootComplete) return
+
+    const fullText = "My personal playground of high-performance dev tools. Zero tracking. 100% Client-side. Built for speed."
+    let i = 0
+    setTypedText("")
+    const timer = setInterval(() => {
+      if (i < fullText.length) {
+        setTypedText(fullText.slice(0, i + 1))
+        i++
+      } else {
+        clearInterval(timer)
+      }
+    }, 30)
+    return () => clearInterval(timer)
+  }, [bootComplete])
+
+  if (!bootComplete) {
+    return (
+      <motion.div
+        initial={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="fixed inset-0 bg-omni-bg z-50 flex items-center justify-center font-mono"
+      >
+        <div className="space-y-2 text-omni-primary/80">
+          {bootMessages.map((msg, i) => (
+            <motion.p
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.3 }}
+              className="text-sm md:text-base"
+            >
+              {msg}
+            </motion.p>
+          ))}
+        </div>
+      </motion.div>
+    )
+  }
+
   return (
     <div className="space-y-32 py-10">
       {/* Hero Section */}
@@ -41,12 +101,15 @@ export default function HomePage() {
           <h1 className="text-6xl md:text-9xl font-black text-omni-text font-mono tracking-tighter leading-[0.85] mb-4">
             OMNI<span className="text-omni-primary neon-text">TOYS</span>
           </h1>
-          
+
           <p className="text-omni-text/40 max-w-2xl mx-auto text-xl md:text-2xl font-medium leading-relaxed">
-            My personal playground of high-performance dev tools. <br className="hidden md:block" />
-            Zero tracking. 100% Client-side. Built for speed.
-          </p>
-38: 
+            {typedText}
+            <motion.span
+              animate={{ opacity: [1, 0] }}
+              transition={{ duration: 0.8, repeat: Infinity }}
+              className="inline-block w-2 h-6 bg-omni-primary ml-1 align-middle"
+            />
+          </p> 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
             <Link 
               to="/tools" 
@@ -179,7 +242,7 @@ function FloatingIcon({ icon, top, left, right, bottom, delay }: FloatingIconPro
 
 function FeatureCard({ icon, title, description }: { icon: ReactNode, title: string, description: string }) {
   return (
-    <motion.div 
+    <motion.div
       whileHover={{ y: -10 }}
       className="p-8 glass-card rounded-[32px] space-y-4 hover:border-omni-primary/30 transition-all group"
     >

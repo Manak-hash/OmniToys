@@ -1,12 +1,22 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
+import { InitialLoader } from './InitialLoader'
 import { ReloadPrompt } from '../ui/ReloadPrompt'
 import { Toaster } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 
+// Generate random stream positions once at module load
+const streams = Array.from({ length: 20 }).map((_, i) => ({
+  key: `stream-${i}`,
+  left: `${Math.random() * 100}%`,
+  animationDelay: `${Math.random() * 8}s`,
+  animationDuration: `${6 + Math.random() * 4}s`
+}))
+
 export function AppLayout() {
   return (
     <div className="min-h-screen bg-omni-bg text-omni-text font-sans selection:bg-omni-primary/30 relative">
+      <InitialLoader />
       <ReloadPrompt />
       <Toaster 
         theme="dark" 
@@ -22,11 +32,23 @@ export function AppLayout() {
         }}
       />
       
-      {/* Mesh Background */}
-      <div className="mesh-bg pointer-events-none">
-        <div className="mesh-circle w-[500px] h-[500px] bg-omni-primary top-[-10%] right-[-5%] opacity-[0.08]" />
-        <div className="mesh-circle w-[400px] h-[400px] bg-blue-500 bottom-[10%] left-[-10%] opacity-[0.05] animation-delay-2000" style={{ animationDelay: '2s' }} />
-        <div className="mesh-circle w-[300px] h-[300px] bg-purple-600 top-[40%] right-[20%] opacity-[0.03] animation-delay-4000" style={{ animationDelay: '4s' }} />
+      {/* Premium Mesh Background */}
+      <div className="mesh-bg pointer-events-none overflow-hidden h-screen w-screen fixed inset-0">
+        <div className="mesh-circle w-[600px] h-[600px] bg-omni-primary top-[-15%] right-[-10%] opacity-[0.12] animate-pulse" />
+        <div className="mesh-circle w-[500px] h-[500px] bg-blue-600 bottom-[-10%] left-[-10%] opacity-[0.08] animation-delay-2000" style={{ animationDelay: '2s' }} />
+        <div className="mesh-circle w-[400px] h-[400px] bg-omni-accent bottom-[30%] right-[-5%] opacity-[0.05] animation-delay-4000" style={{ animationDelay: '4s' }} />
+        <div className="mesh-circle w-[300px] h-[300px] bg-purple-600 top-[20%] left-[20%] opacity-[0.03] animate-bounce duration-[15s]" />
+        {streams.map((stream) => (
+          <div
+            key={stream.key}
+            className="data-stream"
+            style={{
+              left: stream.left,
+              animationDelay: stream.animationDelay,
+              animationDuration: stream.animationDuration
+            }}
+          />
+        ))}
       </div>
 
       <Sidebar />

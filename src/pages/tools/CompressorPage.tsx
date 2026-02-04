@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { FileUploader } from '@/components/ui/FileUploader'
-import { FileText, Download, Archive, RefreshCw, Settings2 } from 'lucide-react'
+import { FileText, Download, Archive, RefreshCw, Settings2, Zap } from 'lucide-react'
 import { toast } from 'sonner'
 import * as fflate from 'fflate'
 import fileDownload from 'js-file-download'
 
-type CompressionFormat = 'gzip' | 'deflate' | 'zip'
+type CompressionFormat = 'gzip' | 'deflate' | 'zip' | 'optimize'
 type CompressionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
 export default function CompressorPage() {
@@ -17,6 +17,7 @@ export default function CompressorPage() {
   const [format, setFormat] = useState<CompressionFormat>('gzip')
   const [level, setLevel] = useState<CompressionLevel>(6)
   const [showOptions, setShowOptions] = useState(false)
+  const [isSmartMode, setIsSmartMode] = useState(true)
 
   const formatSize = (bytes: number) => {
     if (bytes === 0) return '0 B'
@@ -30,6 +31,15 @@ export default function CompressorPage() {
     setFile(uploadedFile)
     setResult(null)
     setProgress(0)
+    
+    // Auto-select optimization for images
+    if (isSmartMode) {
+        if (uploadedFile.type.startsWith('image/')) {
+            setFormat('optimize')
+        } else {
+            setFormat('gzip')
+        }
+    }
   }
 
   const handleDownload = () => {
@@ -97,6 +107,45 @@ export default function CompressorPage() {
             })
           }
         })
+      } else if (format === 'optimize') {
+        outputName = file.name
+        // Image Optimization logic using Canvas
+        if (file.type.startsWith('image/')) {
+            toast.loading('Optimizing image...', { id: toastId })
+            compressedData = await new Promise<Uint8Array>((resolve, reject) => {
+                const img = new Image()
+                img.src = URL.createObjectURL(file)
+                img.onload = () => {
+                    const canvas = document.createElement('canvas')
+                    const ctx = canvas.getContext('2d')
+                    if (!ctx) {
+                        reject(new Error('Failed to get canvas context'))
+                        return
+                    }
+                    
+                    // Maintain aspect ratio
+                    canvas.width = img.width
+                    canvas.height = img.height
+                    ctx.drawImage(img, 0, 0)
+                    
+                    // Quality based on compression level (0-9 -> 0.1-1.0)
+                    const quality = level === 0 ? 0.1 : level / 9
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            const reader = new FileReader()
+                            reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer))
+                            reader.readAsArrayBuffer(blob)
+                        } else {
+                            reject(new Error('Failed to create blob'))
+                        }
+                    }, file.type, quality)
+                }
+                img.onerror = () => reject(new Error('Failed to load image'))
+            })
+        } else {
+            throw new Error('Same-format optimization only supported for images')
+        }
       } else {
         outputName = `${file.name}.deflate`
         compressedData = await new Promise<Uint8Array>((resolve, reject) => {
@@ -108,22 +157,40 @@ export default function CompressorPage() {
       }
 
       setProgress(100)
-      setResult({
-        size: compressedData.length,
-        name: outputName,
-        data: compressedData
-      })
+      
+      // Effectiveness Guard: If compressed data is larger than original, 
+      // use the original data instead (especially for pre-optimized images).
+      if (compressedData.length >= file.size && format === 'optimize') {
+          setResult({
+            size: file.size,
+            name: file.name,
+            data: fileBuffer // Fallback to original
+          })
+          toast.info("File is already highly optimized.")
+      } else {
+          setResult({
+            size: compressedData.length,
+            name: outputName,
+            data: compressedData
+          })
+          
+          const savedPercentNum = (100 - (compressedData.length / file.size * 100))
+          const savedPercent = savedPercentNum.toFixed(1)
+          const savedBytes = file.size - compressedData.length
+          
+          if (savedPercentNum > 0) {
+            toast.success(`Compressed! Saved ${savedPercent}% (${formatSize(savedBytes)})`)
+          } else {
+            toast.info("No significant compression achieved.")
+          }
+      }
       
       setIsCompressing(false)
       toast.dismiss(toastId)
       
-      const savedPercent = (100 - (compressedData.length / file.size * 100)).toFixed(1)
-      const savedBytes = file.size - compressedData.length
-      toast.success(`Compressed! Saved ${savedPercent}% (${formatSize(savedBytes)})`)
-      
-    } catch {
-      console.error('Compression failed')
-      toast.error('Compression failed', { id: toastId })
+    } catch (e) {
+      console.error('Compression failed:', e)
+      toast.error(`Compression failed: ${(e as Error).message}`, { id: toastId })
       setIsCompressing(false)
     }
     // Finalize the effects
@@ -168,21 +235,42 @@ export default function CompressorPage() {
                 <div className="w-full space-y-4 p-4 bg-omni-bg/50 rounded-lg border border-omni-text/5">
                   <div className="space-y-2">
                     <label className="text-sm text-omni-text/70">Format</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(['gzip', 'deflate', 'zip'] as CompressionFormat[]).map(f => (
+                    <div className="grid grid-cols-4 gap-2">
+                      {(['gzip', 'deflate', 'zip', 'optimize'] as CompressionFormat[]).map(f => (
                         <button
                           key={f}
-                          onClick={() => setFormat(f)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          onClick={() => {
+                              setFormat(f)
+                              setIsSmartMode(false)
+                          }}
+                          className={`px-3 py-2 rounded-lg text-[10px] font-black transition-all ${
                             format === f 
-                              ? 'bg-omni-primary text-white' 
-                              : 'bg-omni-text/5 text-omni-text/60 hover:bg-omni-text/10'
+                              ? 'bg-omni-primary text-white shadow-[0_0_15px_rgba(223,28,38,0.4)]' 
+                              : 'bg-white/5 text-omni-text/60 hover:bg-white/10'
                           }`}
                         >
-                          {f.toUpperCase()}
+                          {f === 'optimize' ? 'OPTIMIZE' : f.toUpperCase()}
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5">
+                    <button 
+                        onClick={() => setIsSmartMode(!isSmartMode)}
+                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isSmartMode ? 'bg-omni-primary/10 border border-omni-primary/20' : 'bg-black/20 border border-transparent'}`}
+                    >
+                        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+                            <Zap className={`w-4 h-4 ${isSmartMode ? 'text-omni-primary' : 'text-omni-text/20'}`} />
+                            <span>Neural Smart Mode</span>
+                        </div>
+                        <div className={`w-8 h-4 rounded-full relative transition-colors ${isSmartMode ? 'bg-omni-primary' : 'bg-white/10'}`}>
+                            <div className={`absolute top-1 w-2 h-2 bg-white rounded-full transition-all ${isSmartMode ? 'left-5' : 'left-1'}`} />
+                        </div>
+                    </button>
+                    <p className="text-[10px] text-omni-text/40 mt-2 text-left italic">
+                        Automatically selects best algorithm for your file type.
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
@@ -224,10 +312,10 @@ export default function CompressorPage() {
                 <div className="flex gap-3 pt-4">
                   <button 
                     onClick={compressFile}
-                    className="px-6 py-2 bg-omni-primary hover:bg-omni-primary-hover text-white rounded-lg font-medium transition-colors shadow-lg shadow-omni-primary/20 flex items-center gap-2"
+                    className="flex-1 px-6 py-3 bg-omni-primary hover:bg-omni-primary-hover text-white rounded-xl font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-omni-primary/20 flex items-center justify-center gap-3 group"
                   >
-                    <Archive className="w-4 h-4" />
-                    Compress ({format.toUpperCase()})
+                    {format === 'optimize' ? <Zap className="w-5 h-5 group-hover:scale-125 transition-transform" /> : <Archive className="w-5 h-5" />}
+                    {format === 'optimize' ? 'OPTIMIZE' : 'COMPRESS'}
                   </button>
                   <button 
                     onClick={() => setFile(null)}

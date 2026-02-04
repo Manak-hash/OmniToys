@@ -1,21 +1,47 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
 import { AppLayout } from './components/layout/AppLayout'
 import HomePage from './pages/HomePage'
-import JsonToTsPage from './pages/tools/JsonToTsPage'
-import RegexTesterPage from './pages/tools/RegexTesterPage'
-import PaletteExtractorPage from './pages/tools/PaletteExtractorPage'
-import CompressorPage from './pages/tools/CompressorPage'
-import Base64Page from './pages/tools/Base64Page'
-import QrGeneratorPage from './pages/tools/QrGeneratorPage'
-import UnixTimestampPage from './pages/tools/UnixTimestampPage'
-import PasswordGenPage from './pages/tools/PasswordGenPage'
-import GlassmorphismPage from './pages/tools/GlassmorphismPage'
-import SvgOptimizerPage from './pages/tools/SvgOptimizerPage'
-import ShadowBuilderPage from './pages/tools/ShadowBuilderPage'
-import OcrPage from './pages/tools/OcrPage'
 import ToolsCatalog from './pages/ToolsCatalog'
 import ComingSoonPage from './pages/ComingSoonPage'
 import SettingsPage from './pages/SettingsPage'
+
+// Lazy load tool pages
+const JsonToTsPage = lazy(() => import('./pages/tools/JsonToTsPage'))
+const RegexTesterPage = lazy(() => import('./pages/tools/RegexTesterPage'))
+const PaletteExtractorPage = lazy(() => import('./pages/tools/PaletteExtractorPage'))
+const CompressorPage = lazy(() => import('./pages/tools/CompressorPage'))
+const Base64Page = lazy(() => import('./pages/tools/Base64Page'))
+const QrGeneratorPage = lazy(() => import('./pages/tools/QrGeneratorPage'))
+const UnixTimestampPage = lazy(() => import('./pages/tools/UnixTimestampPage'))
+const PasswordGenPage = lazy(() => import('./pages/tools/PasswordGenPage'))
+const GlassmorphismPage = lazy(() => import('./pages/tools/GlassmorphismPage'))
+const SvgOptimizerPage = lazy(() => import('./pages/tools/SvgOptimizerPage'))
+const ShadowBuilderPage = lazy(() => import('./pages/tools/ShadowBuilderPage'))
+const OcrPage = lazy(() => import('./pages/tools/OcrPage'))
+const EquationSolverPage = lazy(() => import('./pages/tools/EquationSolverPage'))
+const DiffCheckerPage = lazy(() => import('./pages/tools/DiffCheckerPage'))
+const OnlineCompilerPage = lazy(() => import('./pages/tools/OnlineCompilerPage'))
+const WebFontPairerPage = lazy(() => import('./pages/tools/WebFontPairerPage'))
+const AppIconGeneratorPage = lazy(() => import('./pages/tools/mobile/AppIconGeneratorPage'))
+
+// New tool pages from library integration
+const JsonYamlConverterPage = lazy(() => import('./pages/tools/JsonYamlConverterPage'))
+const SqlBeautifierPage = lazy(() => import('./pages/tools/SqlBeautifierPage'))
+const CodeMinifierPage = lazy(() => import('./pages/tools/CodeMinifierPage'))
+const CrontabPage = lazy(() => import('./pages/tools/CrontabPage'))
+const UuidGeneratorPage = lazy(() => import('./pages/tools/UuidGeneratorPage'))
+const ApiPayloadPage = lazy(() => import('./pages/tools/ApiPayloadPage'))
+const ImageConverterPage = lazy(() => import('./pages/tools/ImageConverterPage'))
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-omni-primary"></div>
+    </div>
+  )
+}
 
 const router = createBrowserRouter([
   {
@@ -30,53 +56,199 @@ const router = createBrowserRouter([
         path: 'tools',
         element: <ToolsCatalog />,
       },
+      // Existing tools
       {
         path: 'tools/json-to-ts',
-        element: <JsonToTsPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <JsonToTsPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/regex-tester',
-        element: <RegexTesterPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <RegexTesterPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/palette',
-        element: <PaletteExtractorPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PaletteExtractorPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/compressor',
-        element: <CompressorPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CompressorPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/base64',
-        element: <Base64Page />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <Base64Page />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/qr-generator',
-        element: <QrGeneratorPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <QrGeneratorPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/unix-timestamp',
-        element: <UnixTimestampPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <UnixTimestampPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/password-gen',
-        element: <PasswordGenPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PasswordGenPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/glassmorphism',
-        element: <GlassmorphismPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <GlassmorphismPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/svg-optimizer',
-        element: <SvgOptimizerPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SvgOptimizerPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/shadow-builder',
-        element: <ShadowBuilderPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ShadowBuilderPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/ocr',
-        element: <OcrPage />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <OcrPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/equation-solver',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <EquationSolverPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/diff-checker',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <DiffCheckerPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/online-compiler',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <OnlineCompilerPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/font-pairer',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <WebFontPairerPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/app-icon-gen',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AppIconGeneratorPage />
+          </Suspense>
+        ),
+      },
+      // New tools from library integration
+      {
+        path: 'tools/json-yaml-converter',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <JsonYamlConverterPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/sql-beautifier',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SqlBeautifierPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/code-minifier',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CodeMinifierPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/crontab',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CrontabPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/uuid-generator',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <UuidGeneratorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/api-payload',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ApiPayloadPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/converter',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ImageConverterPage />
+          </Suspense>
+        ),
       },
       {
         path: 'tools/*',

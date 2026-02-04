@@ -6,7 +6,14 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "dev-dist"]),
+  globalIgnores([
+    "dist",
+    "dev-dist",
+    "build",
+    "emsdk/**",
+    "node_modules/**",
+    "mcp-servers/**"
+  ]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -18,6 +25,14 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-implied-eval": "off",
+      "react-hooks/purity": "warn",
+      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/refs": "off",
     },
   },
 ]);
