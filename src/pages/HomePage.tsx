@@ -76,7 +76,7 @@ export default function HomePage() {
   return (
     <div className="space-y-32 py-10">
       {/* Hero Section */}
-      <section className="relative min-h-[70vh] flex flex-col items-center justify-center text-center px-4 overflow-visible">
+      <section className="relative min-h-[70vh] flex flex-col items-center justify-center text-center px-4 overflow-hidden">
         {/* Animated Background Elements */}
         <motion.div 
           animate={{ 
@@ -85,39 +85,39 @@ export default function HomePage() {
             opacity: [0.3, 0.5, 0.3]
           }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-omni-primary/10 rounded-full blur-[120px] pointer-events-none" 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-omni-primary/10 rounded-full blur-[80px] md:blur-[120px] pointer-events-none" 
         />
         
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, type: "spring", stiffness: 100 }}
-          className="relative z-10 space-y-8"
+          className="relative z-10 space-y-8 w-full max-w-full"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-omni-primary/10 border border-omni-primary/20 rounded-full text-omni-primary text-xs font-black uppercase tracking-[0.4em] animate-pulse">
-            <Rocket className="w-4 h-4" /> System Online
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-omni-primary/10 border border-omni-primary/20 rounded-full text-omni-primary text-[10px] md:text-xs font-black uppercase tracking-[0.2em] md:tracking-[0.4em] animate-pulse">
+            <Rocket className="w-3 h-3 md:w-4 h-4" /> System Online
           </div>
           
-          <h1 className="text-6xl md:text-9xl font-black text-omni-text font-mono tracking-tighter leading-[0.85] mb-4">
+          <h1 className="text-4xl sm:text-6xl md:text-9xl font-black text-omni-text font-mono tracking-tighter leading-[0.85] mb-4 break-words">
             OMNI<span className="text-omni-primary neon-text">TOYS</span>
           </h1>
 
-          <p className="text-omni-text/40 max-w-2xl mx-auto text-xl md:text-2xl font-medium leading-relaxed">
+          <p className="text-omni-text/40 max-w-2xl mx-auto text-lg md:text-2xl font-medium leading-relaxed px-4">
             {typedText}
             <motion.span
               animate={{ opacity: [1, 0] }}
               transition={{ duration: 0.8, repeat: Infinity }}
-              className="inline-block w-2 h-6 bg-omni-primary ml-1 align-middle"
+              className="inline-block w-1.5 h-5 md:w-2 md:h-6 bg-omni-primary ml-1 align-middle"
             />
           </p> 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-8">
             <Link 
               to="/tools" 
-              className="group relative px-10 py-5 bg-omni-primary text-white rounded-2xl font-black uppercase tracking-widest text-lg transition-all hover:scale-105 hover:neon-glow overflow-hidden"
+              className="w-full sm:w-auto group relative px-8 py-4 md:px-10 md:py-5 bg-omni-primary text-white rounded-2xl font-black uppercase tracking-widest text-base md:text-lg transition-all hover:scale-105 hover:neon-glow overflow-hidden text-center"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              <div className="relative flex items-center gap-3">
-                Enter Laboratory <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+              <div className="relative flex items-center justify-center gap-3">
+                Enter Laboratory <ArrowRight className="w-5 h-5 md:w-6 h-6 group-hover:translate-x-2 transition-transform" />
               </div>
             </Link>
             
@@ -125,9 +125,9 @@ export default function HomePage() {
               href="https://github.com/Manak-hash/OmniToys" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-10 py-5 bg-omni-text/5 hover:bg-omni-text/10 border border-omni-text/5 rounded-2xl font-black uppercase tracking-widest text-lg transition-all"
+              className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 md:px-10 md:py-5 bg-omni-text/5 hover:bg-omni-text/10 border border-omni-text/5 rounded-2xl font-black uppercase tracking-widest text-base md:text-lg transition-all text-center"
             >
-              <Github className="w-6 h-6" /> Repository
+              <Github className="w-5 h-5 md:w-6 h-6" /> Repository
             </a>
           </div>
         </motion.div>

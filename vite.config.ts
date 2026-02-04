@@ -22,12 +22,12 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'src/assets/icons/OmniToys(WebIcon).png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'src/assets/icons/OmniToys(WebIcon).png',
             sizes: '512x512',
             type: 'image/png'
           }
@@ -42,5 +42,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+   server: {
+    host: true,
   },
 });

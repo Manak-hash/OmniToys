@@ -1,6 +1,12 @@
-# 🛠️ OmniToys
+<p align="center">
+  <a href="https://omnitoys.vercel.app/" target="_blank"><img src="src/assets/icons/OmniToys(AppIcon-NoBG).png" width="128" alt="OmniToys Logo" /></a>
+</p>
 
-Yo! Welcome to **OmniToys**. This is my centralized personal toolbox where I'm regrouping every utility I actually need in one place.
+---
+
+Yo! Welcome to **OMNI<span style="color: #df1c26;">TOYS</span>**. This is my centralized personal toolbox where I'm regrouping every utility I actually need in one place.
+
+**[→ Launch App](https://omnitoys.vercel.app/)**
 
 > [!IMPORTANT]
 > **OmniToys is currently a Work In Progress (WIP).** I am actively building out the modules. This means the project is still incomplete, and many planned tools and features are not yet available in the laboratory.
@@ -16,6 +22,7 @@ README will be updated soon too.
 OmniToys integrates the following open-source libraries. All licenses are permissive (MIT/BSD/Apache-2.0):
 
 ### Core Dependencies
+
 - **React** (MIT) - UI framework
 - **Vite** (MIT) - Build tool
 - **React Router DOM** (MIT) - Client-side routing
@@ -25,9 +32,11 @@ OmniToys integrates the following open-source libraries. All licenses are permis
 - **Lucide React** (MIT) - Icons
 
 ### Code Editor
+
 - **CodeMirror 6** (MIT) - Full-featured code editor with syntax highlighting
 
 ### Data & Format Tools
+
 - **js-yaml** (MIT) - YAML parser and generator
 - **sql-formatter** (MIT) - SQL query beautifier
 - **SVGO** (MIT) - SVG optimizer
@@ -36,11 +45,13 @@ OmniToys integrates the following open-source libraries. All licenses are permis
 - **html-minifier-terser** (MIT) - HTML minifier
 
 ### Developer Utilities
+
 - **cron-parser** (MIT) - Cron expression parser
 - **uuid** (MIT) - UUID generator
 - **lorem-ipsum** (BSD-3-Clause) - Lorem ipsum text generator
 
 ### Existing Libraries
+
 - **PrismJS** (MIT) - Syntax highlighting (legacy, being replaced by CodeMirror)
 - **ColorThief** (MIT) - Color palette extraction
 - **QRCode** (MIT) - QR code generation
@@ -51,6 +62,7 @@ OmniToys integrates the following open-source libraries. All licenses are permis
 - **react-image-crop** (MIT) - Advanced image cropping
 
 ### Full License Details
+
 See individual `node_modules/*/LICENSE` files for complete license text.
 
 All libraries are compatible with OmniToys' MIT license and do not impose additional restrictions on the use of this project.

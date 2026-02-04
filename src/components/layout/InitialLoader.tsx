@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import logo from '@/assets/icons/OmniToys.png'
+import logo from '@/assets/icons/OmniToys(WebIcon).png'
 
 const LOGS = [
   "SECURE_LINK: AUTHORIZED",

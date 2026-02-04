@@ -12,7 +12,7 @@ import { toast } from 'sonner'
 import fileDownload from 'js-file-download'
 import { cn } from '@/utils/cn'
 import { motion, AnimatePresence } from 'framer-motion'
-import logo from '@/assets/icons/OmniToys.png'
+import logo from '@/assets/icons/OmniToys(WebIcon).png'
 
 type ViewMode = 'ios' | 'android' | 'splash' | 'store'
 

@@ -33,7 +33,7 @@ export function AppLayout() {
       />
       
       {/* Premium Mesh Background */}
-      <div className="mesh-bg pointer-events-none overflow-hidden h-screen w-screen fixed inset-0">
+      <div className="mesh-bg pointer-events-none overflow-hidden fixed inset-0">
         <div className="mesh-circle w-[600px] h-[600px] bg-omni-primary top-[-15%] right-[-10%] opacity-[0.12] animate-pulse" />
         <div className="mesh-circle w-[500px] h-[500px] bg-blue-600 bottom-[-10%] left-[-10%] opacity-[0.08] animation-delay-2000" style={{ animationDelay: '2s' }} />
         <div className="mesh-circle w-[400px] h-[400px] bg-omni-accent bottom-[30%] right-[-5%] opacity-[0.05] animation-delay-4000" style={{ animationDelay: '4s' }} />

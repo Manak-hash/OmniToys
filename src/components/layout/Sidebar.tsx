@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import logo from '@/assets/icons/OmniToys.png'
+import logo from '@/assets/icons/OmniToys(WebIcon).png'
 import { usePreferences } from '@/store/preferences'
 import { ALL_TOOLS } from '@/constants/tools'
 
