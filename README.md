@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://omnitoys.vercel.app/" target="_blank"><img src="src/assets/icons/OmniToys(AppIcon-NoBG).png" width="128" alt="OmniToys Logo" /></a>
+  <a href="https://omnitoys.vercel.app/" target="_blank"><img src="src/assets/icons/OmniToys(Banner-NoBG).png" width="100%" alt="OmniToys Logo" /></a>
 </p>
 
 ---
