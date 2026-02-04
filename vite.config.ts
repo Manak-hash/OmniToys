@@ -12,7 +12,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'OmniToys',
         short_name: 'OmniToys',
@@ -22,14 +22,20 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'src/assets/icons/OmniToys(WebIcon).png',
+            src: 'icon-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'src/assets/icons/OmniToys(WebIcon).png',
+            src: 'icon-512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: 'icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       },
