@@ -4,6 +4,7 @@ import { ArrowLeft, Share2, Star } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { usePreferences } from '@/store/preferences'
 import { toast } from 'sonner'
+import { useEffect } from 'react'
 
 interface ToolLayoutProps {
   title: string
@@ -16,8 +17,15 @@ interface ToolLayoutProps {
 export function ToolLayout({ title, description, icon, children, actions }: ToolLayoutProps) {
   const location = useLocation()
   const toolId = location.pathname.split('/').pop() || ''
-  const { favorites, addFavorite, removeFavorite } = usePreferences()
+  const { favorites, addFavorite, removeFavorite, addRecentTool } = usePreferences()
   const isFavorite = favorites.includes(toolId)
+
+  // Track recent tools
+  useEffect(() => {
+    if (toolId) {
+      addRecentTool(toolId)
+    }
+  }, [toolId, addRecentTool])
 
   const handleShare = async () => {
     const shareData = {

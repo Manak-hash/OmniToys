@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Search, X, PlusCircle, Star
+import {
+  Search, X, PlusCircle, Star, Keyboard
 } from 'lucide-react'
 import { usePreferences } from '@/store/preferences'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -169,6 +169,22 @@ export default function ToolsCatalog() {
            </div>
         </div>
       )}
+
+      {/* Keyboard Shortcuts Hint */}
+      <div className="mt-8 px-6 py-4 glass-card rounded-[32px] border-dashed">
+        <div className="flex items-start gap-3">
+          <Keyboard className="w-5 h-5 text-omni-text/40 flex-shrink-0" />
+          <div>
+            <h4 className="text-sm font-semibold text-omni-text mb-2">Keyboard Shortcuts</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-2 text-xs text-omni-text/60">
+              <div><kbd className="px-1.5 py-0.5 bg-omni-text/10 rounded">Cmd+K</kbd> <span className="ml-1">Search</span></div>
+              <div><kbd className="px-1.5 py-0.5 bg-omni-text/10 rounded">Esc</kbd> <span className="ml-1">Close modal</span></div>
+              <div><kbd className="px-1.5 py-0.5 bg-omni-text/10 rounded">↑↓</kbd> <span className="ml-1">Navigate</span></div>
+              <div><kbd className="px-1.5 py-0.5 bg-omni-text/10 rounded">Enter</kbd> <span className="ml-1">Open tool</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

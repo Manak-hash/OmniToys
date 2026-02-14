@@ -31,7 +31,7 @@ export const ALL_TOOLS: Tool[] = [
   { id: 'font-pairer', to: '/tools/font-pairer', title: 'Web Font Pairer', description: 'Test Google Font combinations', icon: createIcon(Type), category: 'Design', isComingSoon: false },
   { id: 'lottie', to: '/tools/lottie', title: 'Lottie Previewer', description: 'Drag-and-drop animation testing', icon: createIcon(Radio), category: 'Design', isComingSoon: true },
   { id: 'tailwind-palette', to: '/tools/tailwind-palette', title: 'Tailwind Palette Master', description: 'Generate 50-950 color scales', icon: createIcon(Palette), category: 'Design', isComingSoon: true },
-  { id: 'golden-ratio', to: '/tools/golden-ratio', title: 'Golden Ratio Calculator', description: 'Math-based layout sizing', icon: createIcon(Ratio), category: 'Design', isComingSoon: true },
+  { id: 'golden-ratio', to: '/tools/golden-ratio', title: 'Golden Ratio Calculator', description: 'Math-based layout sizing', icon: createIcon(Ratio), category: 'Design', isNew: true },
   { id: 'color-picker', to: '/tools/color-picker', title: 'Color Picker & Contrast', icon: createIcon(Eye), description: 'Accessibility checker', category: 'Design', isComingSoon: true },
 
   // Web Development & Coding
@@ -48,9 +48,9 @@ export const ALL_TOOLS: Tool[] = [
   { id: 'meta-tags', to: '/tools/meta-tags', title: 'Meta Tag Pro', description: 'SEO previewer for social', icon: createIcon(Globe), category: 'Dev', isComingSoon: true },
   { id: 'markdown-editor', to: '/tools/markdown-editor', title: 'Markdown Live Editor', description: 'Full-featured MD editor with shortcuts', icon: createIcon(BookOpen), category: 'Dev', isComingSoon: true },
   { id: 'css-to-tailwind', to: '/tools/css-to-tailwind', title: 'CSS to Tailwind', description: 'Convert raw CSS to Tailwind', icon: createIcon(Code2), category: 'Dev', isComingSoon: true },
-  { id: 'svg-to-jsx', to: '/tools/svg-to-jsx', title: 'SVG to JSX/React', description: 'Transform SVG to React components', icon: createIcon(FileCode), category: 'Dev', isComingSoon: true },
+  { id: 'svg-to-jsx', to: '/tools/svg-to-jsx', title: 'SVG to JSX/React', description: 'Transform SVG to React components', icon: createIcon(FileCode), category: 'Dev', isNew: true },
   { id: 'bundle-size', to: '/tools/bundle-size', title: 'Bundle Size Mock-up', description: 'Estimate library weight impact', icon: createIcon(FileSearch), category: 'Dev', isComingSoon: true },
-  { id: 'curl-to-fetch', to: '/tools/curl-to-fetch', title: 'Curl to Fetch/Axios', description: 'Convert curl to TypeScript', icon: createIcon(Terminal), category: 'Dev', isComingSoon: true },
+  { id: 'curl-to-fetch', to: '/tools/curl-to-fetch', title: 'Curl to Fetch/Axios', description: 'Convert curl to TypeScript', icon: createIcon(Terminal), category: 'Dev', isNew: true },
 
   // File & Text Processing
   { id: 'compressor', to: '/tools/compressor', title: 'Ultra Compressor', description: 'Brotli/Gzip file optimization', icon: createIcon(FileText), category: 'File', isNew: true },
@@ -61,20 +61,20 @@ export const ALL_TOOLS: Tool[] = [
   { id: 'md-to-pdf', to: '/tools/md-to-pdf', title: 'Markdown to PDF/HTML', description: 'Professional export tool', icon: createIcon(FileText), category: 'File', isComingSoon: true },
   { id: 'waveform', to: '/tools/waveform', title: 'Audio Waveform Generator', description: 'SVG waveforms from audio', icon: createIcon(FileAudio), category: 'File', isComingSoon: true },
   { id: 'diff-checker', to: '/tools/diff-checker', title: 'Diff Checker', description: 'Side-by-side comparison', icon: createIcon(Diff), category: 'File', isWasm: true },
-  { id: 'text-analysis', to: '/tools/text-analysis', title: 'Text Analysis Pro', description: 'Word counts, reading difficulty', icon: createIcon(Type), category: 'File', isComingSoon: true },
+  { id: 'text-analysis', to: '/tools/text-analysis', title: 'Text Analysis Pro', description: 'Word counts, reading difficulty', icon: createIcon(Type), category: 'File', isNew: true },
 
   // Advanced Logic & Math
   { id: 'equation-solver', to: '/tools/equation-solver', title: 'Equation Solver', description: 'Algebraic/scientific calculations', icon: createIcon(Calculator), category: 'Math', isWasm: true },
-  { id: 'unit-converter', to: '/tools/unit-converter', title: 'Unit & Currency Converter', description: 'Data, weight, live currency', icon: createIcon(Calculator), category: 'Math', isComingSoon: true },
+  { id: 'unit-converter', to: '/tools/unit-converter', title: 'Unit & Currency Converter', description: 'Data, weight, live currency', icon: createIcon(Calculator), category: 'Math', isNew: true },
   { id: 'algorithm-viz', to: '/tools/algorithm-viz', title: 'Algorithm Visualizer', description: 'Sorting/pathfinding animations', icon: createIcon(Binary), category: 'Math', isComingSoon: true },
   { id: 'unix-timestamp', to: '/tools/unix-timestamp', title: 'Unix Timestamp Master', description: 'Epoch to human-readable', icon: createIcon(Clock), category: 'Math', isNew: true },
 
   // Security & Productivity
   { id: 'base64', to: '/tools/base64', title: 'Base64 Encoder/Decoder', description: 'Strings and images', icon: createIcon(Shield), category: 'Security', isNew: true },
-  { id: 'jwt-inspector', to: '/tools/jwt-inspector', title: 'JWT Inspector', description: 'Decode tokens locally', icon: createIcon(Lock), category: 'Security', isComingSoon: true },
+  { id: 'jwt-inspector', to: '/tools/jwt-inspector', title: 'JWT Inspector', description: 'Decode tokens locally', icon: createIcon(Lock), category: 'Security', isNew: true },
   { id: 'password-gen', to: '/tools/password-gen', title: 'Password Shield', description: 'Cryptographic password generator', icon: createIcon(Lock), category: 'Security', isNew: true },
   { id: 'qr-generator', to: '/tools/qr-generator', title: 'QR Code Generator', description: 'URLs, Wi-Fi, V-Cards', icon: createIcon(QrCode), category: 'Security', isNew: true },
-  { id: 'pomodoro', to: '/tools/pomodoro', title: 'Pomodoro Timer', description: 'Productivity workflow tool', icon: createIcon(Timer), category: 'Security', isComingSoon: true },
+  { id: 'pomodoro', to: '/tools/pomodoro', title: 'Pomodoro Timer', description: 'Productivity workflow tool', icon: createIcon(Timer), category: 'Security', isNew: true },
   { id: 'pii-scrubber', to: '/tools/pii-scrubber', title: 'PII Scrubber (Anonymizer)', description: 'Mask emails, names, phones', icon: createIcon(Scissors), category: 'Security', isComingSoon: true },
   { id: 'sql-visualizer', to: '/tools/sql-visualizer', title: 'SQL Schema Visualizer', description: 'CREATE TABLE to ERD diagram', icon: createIcon(Database), category: 'Security', isComingSoon: true },
   { id: 'metadata-stripper', to: '/tools/metadata-stripper', title: 'Metadata Stripper', description: 'Remove EXIF from photos', icon: createIcon(Eraser), category: 'Security', isComingSoon: true },

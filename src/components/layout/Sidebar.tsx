@@ -1,7 +1,7 @@
 import { NavLink, Link } from 'react-router-dom'
 import {
   Home, Layout, Settings,
-  Github, X, Terminal, FlaskConical
+  Github, X, Terminal, FlaskConical, Clock
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
@@ -16,17 +16,21 @@ const primaryNav = [
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false)
-  const { favorites } = usePreferences()
+  const { favorites, recentTools } = usePreferences()
 
-  const pinnedTools = useMemo(() => 
+  const pinnedTools = useMemo(() =>
     ALL_TOOLS.filter(t => favorites.includes(t.id)).slice(0, 5),
-  [favorites])
+    [favorites])
+
+  const recent = useMemo(() =>
+    ALL_TOOLS.filter(t => recentTools.includes(t.id)).slice(0, 5),
+    [recentTools])
 
   return (
     <>
       {/* Mobile Toggle */}
       {/* Mobile Terminal Toggle */}
-      <motion.button 
+      <motion.button
         whileHover={{ scale: 1.1, rotate: 5 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
@@ -50,6 +54,7 @@ export function Sidebar() {
             <div className="relative">
               <div className="w-16 h-16 flex items-center justify-center transition-all duration-700 group-hover:scale-110 group-hover:rotate-6 bg-omni-text/5 rounded-3xl border border-white/5 group-hover:border-omni-primary/30 relative z-10 overflow-hidden shadow-2xl shadow-black/50">
                  <img src={logo} alt="OmniToys Logo" className="w-full h-full object-contain p-2" />
+
                  <div className="absolute inset-0 bg-gradient-to-br from-omni-primary/10 to-transparent group-hover:opacity-100 transition-opacity" />
               </div>
               <div className="absolute -top-4 -left-4 w-24 h-24 bg-omni-primary/20 blur-[40px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
@@ -80,8 +85,8 @@ export function Sidebar() {
                   onClick={() => setIsOpen(false)}
                   className={({ isActive }) => `
                     flex items-center gap-3 px-5 py-3.5 rounded-2xl text-[13px] font-black transition-all duration-500 group relative overflow-hidden
-                    ${isActive 
-                      ? 'bg-omni-primary/10 text-white border border-omni-primary/30 shadow-[0_0_25px_rgba(223,28,38,0.15)]' 
+                    ${isActive
+                      ? 'bg-omni-primary/10 text-white border border-omni-primary/30 shadow-[0_0_25px_rgba(223,28,38,0.15)]'
                       : 'text-omni-text/30 hover:text-omni-text hover:bg-white/5 hover:translate-x-1 border border-transparent'}
                   `}
                 >
@@ -109,8 +114,8 @@ export function Sidebar() {
                 </div>
                 <div className="space-y-1">
                   {pinnedTools.map(tool => (
-                    <Link 
-                      key={tool.id} 
+                    <Link
+                      key={tool.id}
                       to={tool.to}
                       onClick={() => setIsOpen(false)}
                       className="flex items-center gap-3 px-5 py-3 rounded-xl text-[11px] font-black text-omni-text/30 hover:text-omni-primary hover:bg-omni-primary/10 transition-all group border border-transparent hover:border-omni-primary/10"
@@ -125,20 +130,30 @@ export function Sidebar() {
               </div>
             )}
 
-            {/* Recent Missions - Styled as Terminal Logs */}
-            <div className="space-y-2">
-               <div className="flex items-center gap-2 ml-4 mb-4">
-                  <Terminal className="w-3.5 h-3.5 text-omni-text/10" />
-                  <p className="text-[10px] text-omni-text/10 font-black uppercase tracking-widest font-mono">/ SECTOR_LOGS</p>
-               </div>
-               <div className="px-5 py-4 rounded-2xl bg-black/20 border border-white/5 space-y-4 opacity-40 hover:opacity-60 transition-opacity">
-                  <div className="flex items-center gap-3">
-                     <span className="w-1.5 h-1.5 bg-omni-text/30 rounded-full animate-pulse" />
-                     <span className="text-[9px] font-mono text-omni-text/40 font-bold uppercase tracking-tighter">Scanning for activity...</span>
-                  </div>
-                  <p className="text-[9px] font-mono text-omni-text/30 leading-snug tracking-tight">Recent neural tool engagement paths will appear here for mission persistence.</p>
-               </div>
-            </div>
+            {/* Recent Tools - Styled as Terminal Logs */}
+            {recent.length > 0 && (
+              <div className="space-y-2">
+                 <div className="flex items-center gap-2 ml-4 mb-4">
+                    <Clock className="w-3.5 h-3.5 text-omni-text/10" />
+                    <p className="text-[10px] text-omni-text/10 font-black uppercase tracking-widest font-mono">/ RECENT_ACCESS</p>
+                 </div>
+                 <div className="space-y-1">
+                   {recent.map(tool => (
+                     <Link
+                       key={tool.id}
+                       to={tool.to}
+                       onClick={() => setIsOpen(false)}
+                       className="flex items-center gap-3 px-5 py-3 rounded-xl text-[11px] font-black text-omni-text/30 hover:text-omni-primary hover:bg-omni-primary/10 transition-all group border border-transparent hover:border-omni-primary/10"
+                     >
+                       <div className="w-5 h-5 flex items-center justify-center text-omni-text/20 group-hover:text-omni-primary transition-all group-hover:scale-110">
+                          {tool.icon}
+                       </div>
+                       <span className="truncate tracking-tight">{tool.title}</span>
+                     </Link>
+                   ))}
+                 </div>
+              </div>
+            )}
 
             {/* System Controls */}
             <nav className="space-y-1.5">
@@ -148,8 +163,8 @@ export function Sidebar() {
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) => `
                   flex items-center gap-3 px-5 py-3.5 rounded-2xl text-[13px] font-black transition-all duration-500 group relative overflow-hidden
-                  ${isActive 
-                    ? 'bg-white/10 text-white border border-white/10' 
+                  ${isActive
+                    ? 'bg-white/10 text-white border border-white/10'
                     : 'text-omni-text/30 hover:text-white hover:bg-white/5 hover:translate-x-1 border border-transparent'}
                 `}
               >
@@ -168,26 +183,28 @@ export function Sidebar() {
                <div className="relative z-10 space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                    <span className="text-omni-text/30 font-mono">Synthesis</span>
-                   <span className="text-omni-primary neon-text font-mono">24/45 UNIT</span>
+                   <span className="text-omni-primary neon-text font-mono">30/50 UNIT</span>
                  </div>
                  <div className="h-1 bg-white/5 rounded-full overflow-hidden flex">
-                   <div className="h-full bg-omni-primary neon-glow-primary w-[26%] transition-all duration-1000 ease-in-out" />
+                   <div className="h-full bg-omni-primary neon-glow-primary w-[60%] transition-all duration-1000 ease-in-out" />
                  </div>
                  <div className="flex items-center gap-2.5 text-[9px] text-omni-text/40 font-black uppercase tracking-[0.1em] font-mono">
                    <div className="flex items-center gap-1.5">
-                     <div className="w-1.5 h-1.5 bg-omni-primary rounded-full" />
-                     <span>v0.2.12</span>
+                     <div className="flex items-center gap-1.5">
+                       <div className="w-1.5 h-1.5 bg-omni-primary rounded-full" />
+                       <span>v0.3.0</span>
+                     </div>
+                     <span className="w-px h-2 bg-white/10" />
+                     <span className="text-omni-text/20 font-bold">NODE_01</span>
                    </div>
-                   <span className="w-px h-2 bg-white/10" />
-                   <span className="text-omni-text/20 font-bold">NODE_01</span>
                  </div>
                </div>
             </div>
 
             {/* Contribution - Refined integration */}
-            <a 
+            <a
               href="https://github.com/Manak-hash/OmniToys"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-5 py-3 rounded-2xl text-[11px] font-black text-omni-text/20 hover:text-omni-primary hover:bg-omni-primary/5 transition-all group border border-transparent hover:border-omni-primary/10"
             >
@@ -200,7 +217,7 @@ export function Sidebar() {
 
       {/* Mobile Overlay - Premium Blur */}
       {isOpen && (
-        <div 
+        <div
           onClick={() => setIsOpen(false)}
           className="fixed inset-0 bg-black/60 backdrop-blur-md z-30 lg:hidden transition-opacity duration-1000"
         />

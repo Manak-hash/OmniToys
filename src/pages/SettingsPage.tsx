@@ -132,7 +132,7 @@ export default function SettingsPage() {
                    <Info className="w-5 h-5 text-omni-text/20" />
                    <span className="text-sm font-bold text-omni-text">Project Version</span>
                 </div>
-                <span className="font-mono text-xs text-omni-text/40">v0.2.12 (BETA_LAB)</span>
+                <span className="font-mono text-xs text-omni-text/40">v0.3.0 (BETA_LAB)</span>
              </div>
              <div className="h-px bg-omni-text/5" />
              <div className="flex items-center justify-between">

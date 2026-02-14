@@ -4,6 +4,9 @@ import { InitialLoader } from './InitialLoader'
 import { ReloadPrompt } from '../ui/ReloadPrompt'
 import { Toaster } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ToolSearchModal } from '../tools/ToolSearchModal'
+import { usePreferences } from '@/store/preferences'
+import { useEffect, useState } from 'react'
 
 // Generate random stream positions once at module load
 const streams = Array.from({ length: 20 }).map((_, i) => ({
@@ -14,6 +17,21 @@ const streams = Array.from({ length: 20 }).map((_, i) => ({
 }))
 
 export function AppLayout() {
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const { recentTools } = usePreferences()
+
+  // Keyboard shortcut for search (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setIsSearchOpen(true)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
   return (
     <div className="min-h-screen bg-omni-bg text-omni-text font-sans selection:bg-omni-primary/30 relative">
       <InitialLoader />
@@ -75,6 +93,13 @@ export function AppLayout() {
       
       {/* Subtle Noise Texture Overlay */}
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.015] contrast-150 brightness-150 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+
+      {/* Global Tool Search Modal */}
+      <ToolSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        recentTools={recentTools}
+      />
     </div>
   )
 }

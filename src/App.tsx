@@ -33,6 +33,13 @@ const CrontabPage = lazy(() => import('./pages/tools/CrontabPage'))
 const UuidGeneratorPage = lazy(() => import('./pages/tools/UuidGeneratorPage'))
 const ApiPayloadPage = lazy(() => import('./pages/tools/ApiPayloadPage'))
 const ImageConverterPage = lazy(() => import('./pages/tools/ImageConverterPage'))
+const JwtInspectorPage = lazy(() => import('./pages/tools/JwtInspectorPage'))
+const PomodoroPage = lazy(() => import('./pages/tools/PomodoroPage'))
+const GoldenRatioPage = lazy(() => import('./pages/tools/GoldenRatioPage'))
+const SvgToJsxPage = lazy(() => import('./pages/tools/SvgToJsxPage'))
+const TextAnalysisPage = lazy(() => import('./pages/tools/TextAnalysisPage'))
+const CurlToFetchPage = lazy(() => import('./pages/tools/CurlToFetchPage'))
+const UnitConverterPage = lazy(() => import('./pages/tools/UnitConverterPage'))
 
 // Loading fallback component
 function LoadingFallback() {
@@ -247,6 +254,62 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <ImageConverterPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/jwt-inspector',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <JwtInspectorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/pomodoro',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PomodoroPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/golden-ratio',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <GoldenRatioPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/svg-to-jsx',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SvgToJsxPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/text-analysis',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TextAnalysisPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/curl-to-fetch',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CurlToFetchPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/unit-converter',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <UnitConverterPage />
           </Suspense>
         ),
       },

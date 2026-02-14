@@ -17,7 +17,7 @@ const SIZE_PRESETS = [
 
 export default function QrGeneratorPage() {
   const [qrType, setQrType] = useState<QRType>('text')
-  const [text, setText] = useState('https://omnitoys.app')
+  const [text, setText] = useState('https://omnitoys.vercel.app')
   const [size, setSize] = useState(256)
   const [bgColor, setBgColor] = useState('#ffffff')
   const [fgColor, setFgColor] = useState('#000000')
