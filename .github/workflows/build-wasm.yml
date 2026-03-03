@@ -18,6 +18,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Required for pushing WASM files back to repository
+permissions:
+  contents: write
+
 jobs:
   build-wasm:
     name: Build WASM Modules
