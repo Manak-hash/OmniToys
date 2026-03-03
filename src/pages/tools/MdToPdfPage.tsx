@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
-import { FileText, Download, Eye, FileCode, Printer } from 'lucide-react'
+import { FileText, FileCode, Printer } from 'lucide-react'
 import { toast } from 'sonner'
 
 const EXAMPLE_MD = `# My Document
@@ -88,9 +88,7 @@ const parseMarkdown = (md: string): string => {
 export default function MdToPdfPage() {
   const [markdown, setMarkdown] = useState(EXAMPLE_MD)
   const [html, setHtml] = useState('')
-  const [viewMode, setViewMode] = useState<'split' | 'preview'>('split')
   const [fileName, setFileName] = useState('document')
-  const printFrameRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     setHtml(parseMarkdown(markdown))

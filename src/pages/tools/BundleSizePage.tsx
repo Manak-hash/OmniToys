@@ -25,7 +25,6 @@ export default function BundleSizePage() {
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<PackageInfo[]>([])
   const [totalSize, setTotalSize] = useState({ size: 0, gzip: 0 })
-  const [fileInputRef, setFileInputRef] = useState<HTMLInputElement | null>(null)
 
   // Format bytes to human readable
   const formatBytes = (bytes: number): string => {
@@ -67,7 +66,7 @@ export default function BundleSizePage() {
 
     setLoading(true)
     const fetchedResults: PackageInfo[] = []
-    let total = { size: 0, gzip: 0 }
+    const total = { size: 0, gzip: 0 }
 
     for (const pkg of packages) {
       if (!pkg.name.trim()) continue
@@ -135,7 +134,7 @@ export default function BundleSizePage() {
       } else {
         toast.error('No dependencies found in package.json')
       }
-    } catch (error) {
+    } catch {
       toast.error('Invalid package.json file')
     }
 
@@ -159,7 +158,7 @@ export default function BundleSizePage() {
       } else {
         toast.error('No dependencies found in clipboard')
       }
-    } catch (error) {
+    } catch {
       toast.error('Could not read from clipboard. Try importing a file instead.')
     }
   }, [])

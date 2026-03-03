@@ -22,12 +22,6 @@ export default function SSLSentinelPage() {
       return
     }
 
-    // Add protocol if missing
-    let targetUrl = url
-    if (!url.match(/^https?:\/\//)) {
-      targetUrl = 'https://' + url
-    }
-
     setIsChecking(true)
     setResults([])
 

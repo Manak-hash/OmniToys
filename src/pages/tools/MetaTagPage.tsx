@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { InputPane } from '@/components/tools/InputPane'
 import { OutputPane } from '@/components/tools/OutputPane'
@@ -64,10 +64,9 @@ export default function MetaTagPage() {
   const [meta, setMeta] = useState<MetaData>(DEFAULT_META)
   const [activeTab, setActiveTab] = useState<'html' | 'twitter' | 'facebook' | 'linkedin' | 'json-ld'>('html')
   const [contentType, setContentType] = useState<ContentType>('website')
-  const [score, setScore] = useState({ title: 0, description: 0, overall: 0 })
 
   // Calculate SEO score
-  useEffect(() => {
+  const score = useMemo(() => {
     const titleScore = Math.min(100, Math.max(0,
       (meta.title.length >= 50 ? 30 : 0) +
       (meta.title.length <= 60 ? 30 : 0) +
@@ -80,11 +79,11 @@ export default function MetaTagPage() {
       (meta.description.length > 0 ? 40 : 0)
     ))
 
-    setScore({
+    return {
       title: titleScore,
       description: descScore,
       overall: Math.round((titleScore + descScore) / 2),
-    })
+    }
   }, [meta.title, meta.description])
 
   const generateMetaTags = useCallback(() => {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
 import { Hash, Copy, Download } from 'lucide-react'
@@ -10,21 +10,42 @@ export default function UnicodePage() {
   const [showDetails, setShowDetails] = useState(false)
   const [unicodeInfo, setUnicodeInfo] = useState<Array<{ char: string; code: string; hex: string; binary: string; name: string; category: string }>>([])
 
-  const getUnicodeInfo = useCallback((char: string) => {
+  const getCharName = useCallback((char: string): string => {
     const code = char.charCodeAt(0)
-    const hex = code.toString(16).toUpperCase().padStart(4, '0')
-    const bin = code.toString(2).padStart(8, '0')
+    const common: Record<number, string> = {
+      32: 'Space',
+      9: 'Tab',
+      10: 'Line Feed (Newline)',
+      13: 'Carriage Return',
+      160: 'Non-breaking Space',
+      8230: 'Ellipsis',
+      8220: 'Left Double Quote',
+      8221: 'Right Double Quote',
+      8216: 'Left Single Quote',
+      8217: 'Right Single Quote',
+      169: 'Copyright Sign',
+      174: 'Registered Sign',
+      8364: 'Euro Sign',
+      163: 'Pound Sign',
+      165: 'Yen Sign',
+    }
+    return common[code] || `Unicode Character U+${code.toString(16).toUpperCase()}`
+  }, [])
 
-    let category = 'Other'
-    if (code >= 48 && code <= 57) category = 'Number (0-9)'
-    else if (code >= 65 && code <= 90) category = 'Uppercase Letter (A-Z)'
-    else if (code >= 97 && code <= 122) category = 'Lowercase Letter (a-z)'
-    else if (code >= 32 && code <= 126) category = 'ASCII Printable'
-    else if (code >= 0x4E00 && code <= 0x9FFF) category = 'CJK Unified Ideograph'
-    else if (code >= 0x0400 && code <= 0x04FF) category = 'Cyrillic'
-    else if (code >= 0x0370 && code <= 0x03FF) category = 'Greek'
-
-    return { char, code, hex, bin, category }
+  const getCategory = useCallback((code: number): string => {
+    if (code >= 48 && code <= 57) return 'Number'
+    if (code >= 65 && code <= 90) return 'Uppercase'
+    if (code >= 97 && code <= 122) return 'Lowercase'
+    if (code <= 31) return 'Control Character'
+    if (code === 127) return 'Control Character'
+    if (code >= 32 && code <= 126) return 'ASCII Printable'
+    if (code >= 128 && code <= 255) return 'Latin Extended'
+    if (code >= 0x4E00 && code <= 0x9FFF) return 'CJK Ideograph'
+    if (code >= 0x0400 && code <= 0x04FF) return 'Cyrillic'
+    if (code >= 0x0370 && code <= 0x03FF) return 'Greek'
+    if (code >= 0x0600 && code <= 0x06FF) return 'Arabic'
+    if (code >= 0x0590 && code <= 0x05FF) return 'Hebrew'
+    return 'Other Unicode'
   }, [])
 
   const analyzeText = useCallback(() => {
@@ -61,45 +82,7 @@ export default function UnicodePage() {
 
     setOutput(outputText)
     toast.success(`Analyzed ${chars.length} characters!`)
-  }, [input, getUnicodeInfo])
-
-  const getCharName = (char: string): string => {
-    const code = char.charCodeAt(0)
-    const common: Record<number, string> = {
-      32: 'Space',
-      9: 'Tab',
-      10: 'Line Feed (Newline)',
-      13: 'Carriage Return',
-      160: 'Non-breaking Space',
-      8230: 'Ellipsis',
-      8220: 'Left Double Quote',
-      8221: 'Right Double Quote',
-      8216: 'Left Single Quote',
-      8217: 'Right Single Quote',
-      169: 'Copyright Sign',
-      174: 'Registered Sign',
-      8364: 'Euro Sign',
-      163: 'Pound Sign',
-      165: 'Yen Sign',
-    }
-    return common[code] || `Unicode Character U+${code.toString(16).toUpperCase()}`
-  }
-
-  const getCategory = (code: number): string => {
-    if (code >= 48 && code <= 57) return 'Number'
-    if (code >= 65 && code <= 90) return 'Uppercase'
-    if (code >= 97 && code <= 122) return 'Lowercase'
-    if (code <= 31) return 'Control Character'
-    if (code === 127) return 'Control Character'
-    if (code >= 32 && code <= 126) return 'ASCII Printable'
-    if (code >= 128 && code <= 255) return 'Latin Extended'
-    if (code >= 0x4E00 && code <= 0x9FFF) return 'CJK Ideograph'
-    if (code >= 0x0400 && code <= 0x04FF) return 'Cyrillic'
-    if (code >= 0x0370 && code <= 0x03FF) return 'Greek'
-    if (code >= 0x0600 && code <= 0x06FF) return 'Arabic'
-    if (code >= 0x0590 && code <= 0x05FF) return 'Hebrew'
-    return 'Other Unicode'
-  }
+  }, [input, getCharName, getCategory])
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(output)

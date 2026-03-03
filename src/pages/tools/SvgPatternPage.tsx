@@ -78,7 +78,7 @@ export default function SvgPatternPage() {
         `
         break
 
-      case 'zigzag':
+      case 'zigzag': {
         const zigzag = `M0,${sizeNum/2} L${sizeNum/4},0 L${sizeNum*0.75},${sizeNum} L${sizeNum},${sizeNum/2}`
         patternSvg = `
           <svg width="${sizeNum}" height="${sizeNum}" xmlns="http://www.w3.org/2000/svg">
@@ -96,6 +96,7 @@ export default function SvgPatternPage() {
           </svg>
         `
         break
+      }
 
       case 'circles':
         patternSvg = `
@@ -117,7 +118,7 @@ export default function SvgPatternPage() {
         `
         break
 
-      case 'triangles':
+      case 'triangles': {
         const triangle = `M${sizeNum/2},0 L${sizeNum},${sizeNum} L0,${sizeNum} Z`
         patternSvg = `
           <svg width="${sizeNum}" height="${sizeNum}" xmlns="http://www.w3.org/2000/svg">
@@ -135,9 +136,10 @@ export default function SvgPatternPage() {
           </svg>
         `
         break
+      }
 
-      case 'hexagons':
-        const hexPoints = []
+      case 'hexagons': {
+        const hexPoints: string[] = []
         for (let i = 0; i < 6; i++) {
           const angle = (Math.PI / 3) * i
           const x = sizeNum/2 + (sizeNum/2 - stroke) * Math.cos(angle)
@@ -160,8 +162,9 @@ export default function SvgPatternPage() {
           </svg>
         `
         break
+      }
 
-      case 'waves':
+      case 'waves': {
         const wavePath = `M0,${sizeNum/2} Q${sizeNum/4},0 ${sizeNum/2},${sizeNum/2} T${sizeNum},${sizeNum/2}`
         patternSvg = `
           <svg width="${sizeNum}" height="${sizeNum}" xmlns="http://www.w3.org/2000/svg">
@@ -179,6 +182,7 @@ export default function SvgPatternPage() {
           </svg>
         `
         break
+      }
     }
 
     const cssCode = `.pattern-${patternType} {

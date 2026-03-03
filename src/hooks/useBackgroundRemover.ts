@@ -1,10 +1,8 @@
 import { useState, useCallback, useRef } from 'react'
 import {
-  loadBackgroundRemovalModel,
   runInference,
   switchModel,
   getAvailableModels,
-  getActiveModel,
   type BackgroundRemovalModel,
 } from '@/utils/onnxModelLoader'
 import { useAssetCache } from '@/hooks/useAssetCache'
@@ -84,26 +82,6 @@ export function useBackgroundRemover(): BackgroundRemovalState & BackgroundRemov
           autoLoad: false,
         }
   )
-
-  const selectModel = useCallback(async (modelId: string) => {
-    const model = getAvailableModels().find((m) => m.id === modelId)
-    if (!model) {
-      throw new Error(`Unknown model: ${modelId}`)
-    }
-
-    setSelectedModel(model)
-    setState((prev) => ({
-      ...prev,
-      resultImage: null,
-      maskVisualization: null,
-      error: null,
-    }))
-
-    // If we have a cached file, reprocess with new model
-    if (currentFileRef.current) {
-      await removeBackground(currentFileRef.current)
-    }
-  }, [])
 
   const removeBackground = useCallback(
     async (file: File) => {
@@ -187,6 +165,26 @@ export function useBackgroundRemover(): BackgroundRemovalState & BackgroundRemov
     },
     [selectedModel, assetCache, maskControls]
   )
+
+  const selectModel = useCallback(async (modelId: string) => {
+    const model = getAvailableModels().find((m) => m.id === modelId)
+    if (!model) {
+      throw new Error(`Unknown model: ${modelId}`)
+    }
+
+    setSelectedModel(model)
+    setState((prev) => ({
+      ...prev,
+      resultImage: null,
+      maskVisualization: null,
+      error: null,
+    }))
+
+    // If we have a cached file, reprocess with new model
+    if (currentFileRef.current) {
+      await removeBackground(currentFileRef.current)
+    }
+  }, [removeBackground])
 
   const updateMaskControls = useCallback((controls: Partial<MaskControls>) => {
     setMaskControls((prev) => ({ ...prev, ...controls }))

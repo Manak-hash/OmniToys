@@ -212,7 +212,6 @@ const CSS_TO_TAILWIND: Record<string, Record<string, string>> = {
 // Parse CSS and convert to Tailwind
 function convertCssToTailwind(css: string): { tailwind: string; warnings: string[] } {
   const warnings: string[] = []
-  const classes: string[] = []
 
   // Remove comments
   css = css.replace(/\/\*[\s\S]*?\*\//g, '')
@@ -266,9 +265,9 @@ function convertCssToTailwind(css: string): { tailwind: string; warnings: string
             }
             const remValue = spacingMapping[numValue]
             if (remValue) {
-              const found = Object.entries(mapping).find(([k, v]) => v.includes(tailwindClasses[tailwindClasses.length - 1]))
+              const found = Object.entries(mapping).find(([, v]) => v.includes(tailwindClasses[tailwindClasses.length - 1]))
               if (found) {
-                const possibleClass = Object.entries(mapping).find(([k, v]) => k === remValue || k === `${numValue}px` || k === `${numValue}rem`)
+                const possibleClass = Object.entries(mapping).find(([, v]) => v.includes(remValue) || v.includes(`${numValue}px`) || v.includes(`${numValue}rem`))
                 if (possibleClass) {
                   tailwindClasses.push(possibleClass[1])
                 }

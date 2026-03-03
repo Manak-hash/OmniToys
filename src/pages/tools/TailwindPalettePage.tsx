@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { InputPane } from '@/components/tools/InputPane'
 import { OutputPane } from '@/components/tools/OutputPane'
@@ -13,9 +13,9 @@ const hexToHsl = (hex: string): { h: number; s: number; l: number } => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (!result) return { h: 0, s: 0, l: 0 }
 
-  let r = parseInt(result[1], 16) / 255
-  let g = parseInt(result[2], 16) / 255
-  let b = parseInt(result[3], 16) / 255
+  const r = parseInt(result[1], 16) / 255
+  const g = parseInt(result[2], 16) / 255
+  const b = parseInt(result[3], 16) / 255
 
   const max = Math.max(r, g, b), min = Math.min(r, g, b)
   let h = 0, s = 0
@@ -144,46 +144,24 @@ const DEFAULT_COLOR = '#ef4444'
 
 export default function TailwindPalettePage() {
   const [baseColor, setBaseColor] = useState(DEFAULT_COLOR)
-  const [palette, setPalette] = useState<Record<number, string>>(generateTailwindScale(DEFAULT_COLOR))
-  const [harmonyColors, setHarmonyColors] = useState<string[]>([DEFAULT_COLOR])
   const [colorName, setColorName] = useState('primary')
   const [exportFormat, setExportFormat] = useState<'css' | 'js' | 'tailwind'>('css')
   const [harmonyType, setHarmonyType] = useState<HarmonyType>('monochromatic')
   const [saturationBoost, setSaturationBoost] = useState(0)
   const [brightnessOffset, setBrightnessOffset] = useState(0)
 
-  // Update palette when base color or adjustments change
-  useEffect(() => {
-    setPalette(generateTailwindScale(baseColor, saturationBoost, brightnessOffset))
-    setHarmonyColors(generateHarmony(baseColor, harmonyType))
-  }, [baseColor, saturationBoost, brightnessOffset, harmonyType])
-
-  // Copy to clipboard
-  const copyPalette = useCallback(() => {
-    const code = generateExportCode()
-    navigator.clipboard.writeText(code)
-    toast.success('Palette copied to clipboard!')
-  }, [exportFormat, palette, colorName])
-
-  // Copy single color
-  const copyColor = useCallback((color: string, step: number) => {
-    navigator.clipboard.writeText(color)
-    toast.success(`${color} (${step}) copied!`)
-  }, [])
-
-  // Random color
-  const randomColor = useCallback(() => {
-    const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
-    setBaseColor(randomHex)
-  }, [])
-
-  // Apply harmony color
-  const applyHarmonyColor = useCallback((color: string) => {
-    setBaseColor(color)
-  }, [])
+  // Derive palette and harmony colors from base color and adjustments
+  const palette = useMemo(
+    () => generateTailwindScale(baseColor, saturationBoost, brightnessOffset),
+    [baseColor, saturationBoost, brightnessOffset]
+  )
+  const harmonyColors = useMemo(
+    () => generateHarmony(baseColor, harmonyType),
+    [baseColor, harmonyType]
+  )
 
   // Generate export code
-  const generateExportCode = (): string => {
+  const generateExportCode = useCallback((): string => {
     if (exportFormat === 'css') {
       return `/* Tailwind Palette: ${colorName} */
 :root {
@@ -241,7 +219,31 @@ export default {
     },
   },
 }`
-  }
+  }, [exportFormat, colorName, palette])
+
+  // Copy to clipboard
+  const copyPalette = useCallback(() => {
+    const code = generateExportCode()
+    navigator.clipboard.writeText(code)
+    toast.success('Palette copied to clipboard!')
+  }, [generateExportCode])
+
+  // Copy single color
+  const copyColor = useCallback((color: string, step: number) => {
+    navigator.clipboard.writeText(color)
+    toast.success(`${color} (${step}) copied!`)
+  }, [])
+
+  // Random color
+  const randomColor = useCallback(() => {
+    const randomHex = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
+    setBaseColor(randomHex)
+  }, [])
+
+  // Apply harmony color
+  const applyHarmonyColor = useCallback((color: string) => {
+    setBaseColor(color)
+  }, [])
 
   // Get text color based on background
   const getTextColor = (hex: string) => {

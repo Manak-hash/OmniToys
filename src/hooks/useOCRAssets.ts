@@ -38,7 +38,8 @@ export interface OcrAssetsActions {
   clearCache: () => Promise<void>
 }
 
-export function useOCRAssets(defaultLanguage: OcrLanguage = 'eng'): OcrAssetsState & OcrAssetsActions {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function useOCRAssets(_defaultLanguage: OcrLanguage = 'eng'): OcrAssetsState & OcrAssetsActions {
   const [state, setState] = useState<OcrAssetsState>({
     isLoading: false,
     progress: 0,

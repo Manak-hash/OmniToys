@@ -5,7 +5,6 @@ import {
   deleteCachedAsset,
   formatBytes,
   isServiceWorkerCached,
-  type CacheProgress,
   type CacheStatus,
 } from '@/utils/assetCache'
 
@@ -36,6 +35,7 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
   const [isFromServiceWorker, setIsFromServiceWorker] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const blobRef = useRef<Blob | null>(null)
+  const autoLoadTriggeredRef = useRef(false)
 
   // Check cache on mount
   useEffect(() => {
@@ -86,13 +86,6 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
     checkCache()
   }, [assetName, assetUrl, version])
 
-  // Auto-load if enabled
-  useEffect(() => {
-    if (autoLoad && status === 'uncached') {
-      download()
-    }
-  }, [autoLoad, status]) // eslint-disable-line react-hooks/exhaustive-deps
-
   const download = useCallback(async () => {
     if (status === 'cached') {
       console.log(`[useAssetCache] ${assetName} already cached`)
@@ -124,6 +117,15 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
       setProgress(0)
     }
   }, [assetName, assetUrl, version, status])
+
+  // Auto-load if enabled
+  useEffect(() => {
+    if (autoLoad && status === 'uncached' && !autoLoadTriggeredRef.current) {
+      autoLoadTriggeredRef.current = true
+      download()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoLoad, status])
 
   const clear = useCallback(async () => {
     try {

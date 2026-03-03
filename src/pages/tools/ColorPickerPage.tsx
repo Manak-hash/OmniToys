@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { InputPane } from '@/components/tools/InputPane'
 import { OutputPane } from '@/components/tools/OutputPane'
@@ -60,18 +60,16 @@ const checkPass = (ratio: number, size: 'normal' | 'large'): Level => {
 export default function ColorPickerPage() {
   const [foregroundColor, setForegroundColor] = useState('#ffffff')
   const [backgroundColor, setBackgroundColor] = useState('#1a1a2e')
-  const [fgRgb, setFgRgb] = useState({ r: 255, g: 255, b: 255 })
-  const [bgRgb, setBgRgb] = useState({ r: 26, g: 26, b: 46 })
 
-  // Update RGB when hex changes
-  useEffect(() => {
+  // Derive RGB from hex colors
+  const fgRgb = useMemo(() => {
     const rgb = hexToRgb(foregroundColor)
-    if (rgb) setFgRgb(rgb)
+    return rgb || { r: 255, g: 255, b: 255 }
   }, [foregroundColor])
 
-  useEffect(() => {
+  const bgRgb = useMemo(() => {
     const rgb = hexToRgb(backgroundColor)
-    if (rgb) setBgRgb(rgb)
+    return rgb || { r: 26, g: 26, b: 46 }
   }, [backgroundColor])
 
   const contrastRatio = getContrastRatio(foregroundColor, backgroundColor)
@@ -294,11 +292,11 @@ export default function ColorPickerPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">AA (4.5:1)</span>
-                  {renderResultBadge(normalTextResult, 4.5)}
+                  {renderResultBadge(normalTextResult)}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">AAA (7:1)</span>
-                  {renderResultBadge(normalTextResult === 'AAA' ? 'AAA' : 'Fail', 7)}
+                  {renderResultBadge(normalTextResult === 'AAA' ? 'AAA' : 'Fail')}
                 </div>
               </div>
 
@@ -310,11 +308,11 @@ export default function ColorPickerPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">AA (3:1)</span>
-                  {renderResultBadge(largeTextResult, 3)}
+                  {renderResultBadge(largeTextResult)}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">AAA (4.5:1)</span>
-                  {renderResultBadge(largeTextResult === 'AAA' ? 'AAA' : largeTextResult === 'AA' ? 'Fail' : 'Fail', 4.5)}
+                  {renderResultBadge(largeTextResult === 'AAA' ? 'AAA' : largeTextResult === 'AA' ? 'Fail' : 'Fail')}
                 </div>
               </div>
 
@@ -326,7 +324,7 @@ export default function ColorPickerPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">AA (3:1)</span>
-                  {renderResultBadge(uiComponentResult, 3)}
+                  {renderResultBadge(uiComponentResult)}
                 </div>
               </div>
             </div>
@@ -354,7 +352,7 @@ export default function ColorPickerPage() {
   )
 }
 
-function renderResultBadge(result: Level, threshold: number) {
+function renderResultBadge(result: Level) {
   if (result === 'AAA') {
     return (
       <span className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold">

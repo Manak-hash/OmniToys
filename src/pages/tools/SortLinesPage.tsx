@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
-import { ArrowUpDown, Copy, Download, Trash2 } from 'lucide-react'
+import { ArrowUpDown, Copy, Download } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function SortLinesPage() {

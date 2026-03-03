@@ -3,7 +3,7 @@ import { ToolLayout } from '@/components/tools/ToolLayout'
 import { InputPane } from '@/components/tools/InputPane'
 import { OutputPane } from '@/components/tools/OutputPane'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
-import { Binary, Play, Pause, RotateCcw, Shuffle, Zap } from 'lucide-react'
+import { Binary, Play, Pause, Shuffle, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 

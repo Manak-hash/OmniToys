@@ -108,7 +108,7 @@ const parseMarkdown = (md: string): string => {
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto rounded-lg my-4" />')
 
   // Unordered lists (skip checkboxes which are already handled)
-  html = html.replace(/^\-(?!\s*\[)(.*$)/gm, '<li class="ml-4 list-disc">$1</li>')
+  html = html.replace(/^-(?!\s*\[)(.*$)/gm, '<li class="ml-4 list-disc">$1</li>')
   html = html.replace(/(<li class="ml-4 list-disc">.*<\/li>\n?)+/g, '<ul class="my-4 space-y-1">$&</ul>')
 
   // Ordered lists

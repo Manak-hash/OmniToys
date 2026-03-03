@@ -87,7 +87,7 @@ export async function generateQR(
           return canvas.toDataURL('image/png')
         }
 
-      case QRVariant.MICRO:
+      case QRVariant.MICRO: {
         if (text.length > 35) {
           throw new Error('Micro QR max capacity is 35 characters')
         }
@@ -110,6 +110,7 @@ export async function generateQR(
           })
           return canvas.toDataURL('image/png')
         }
+      }
 
       // === All other variants use bwip-js ===
       default:

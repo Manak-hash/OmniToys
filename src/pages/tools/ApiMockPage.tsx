@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
 import { Server, Copy, Plus, Trash2, Play } from 'lucide-react'
@@ -125,7 +125,7 @@ self.addEventListener('fetch', (event) => {
     toast.success('Service Worker code copied!')
   }, [endpoints])
 
-  const examples = [
+  const examples = useMemo(() => [
     {
       method: 'GET' as const,
       path: '/api/users',
@@ -143,7 +143,7 @@ self.addEventListener('fetch', (event) => {
       response: JSON.stringify({ id: 3, name: 'New User', email: 'new@example.com' }, null, 2),
       delay: 500
     },
-  ]
+  ], [])
 
   const loadExample = useCallback((index: number) => {
     const example = examples[index]
@@ -155,7 +155,7 @@ self.addEventListener('fetch', (event) => {
       response: example.response,
       delay: example.delay
     })
-  }, [])
+  }, [examples])
 
   return (
     <ToolLayout

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
 import { Shield, CheckCircle, AlertTriangle, XCircle, Search } from 'lucide-react'
@@ -17,7 +17,7 @@ export default function HeaderOraclePage() {
   const [isChecking, setIsChecking] = useState(false)
   const [results, setResults] = useState<HeaderCheck[]>([])
 
-  const securityHeaders = [
+  const securityHeaders = useMemo(() => [
     {
       name: 'Strict-Transport-Security',
       severity: 'critical' as const,
@@ -63,18 +63,12 @@ export default function HeaderOraclePage() {
       severity: 'good' as const,
       recommendation: 'Protect against cross-origin resource leaks. Recommended: same-origin'
     },
-  ]
+  ], [])
 
   const checkHeaders = useCallback(async () => {
     if (!url) {
       toast.error('Please enter a URL')
       return
-    }
-
-    // Add protocol if missing
-    let targetUrl = url
-    if (!url.match(/^https?:\/\//)) {
-      targetUrl = 'https://' + url
     }
 
     setIsChecking(true)
@@ -102,7 +96,7 @@ export default function HeaderOraclePage() {
     } finally {
       setIsChecking(false)
     }
-  }, [url])
+  }, [url, securityHeaders])
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {

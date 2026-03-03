@@ -30,7 +30,7 @@ export default function PiiScrubberPage() {
     const found: { type: PiiType; count: number; examples: string[] }[] = []
 
     selectedTypes.forEach((type) => {
-      const { pattern, label } = PII_PATTERNS[type]
+      const { pattern } = PII_PATTERNS[type]
       const matches = input.match(pattern)
 
       if (matches) {

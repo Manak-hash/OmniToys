@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { InputPane } from '@/components/tools/InputPane'
 import { OutputPane } from '@/components/tools/OutputPane'
@@ -52,17 +52,15 @@ CREATE TABLE comments (
 
 export default function SqlVisualizerPage() {
   const [sqlInput, setSqlInput] = useState(EXAMPLE_SQL)
-  const [tables, setTables] = useState<Table[]>([])
-  const [relationships, setRelationships] = useState<Relationship[]>([])
   const [showPreview, setShowPreview] = useState(false)
 
-  // Parse SQL CREATE statements
-  const parseSQL = useCallback((sql: string) => {
+  // Parse SQL CREATE statements - derived from sqlInput
+  const { tables: parsedTables, relationships: parsedRelationships } = useMemo(() => {
     const parsedTables: Table[] = []
     const parsedRelationships: Relationship[] = []
 
     // Split by CREATE TABLE statements
-    const createStatements = sql.match(/CREATE\s+TABLE\s+(\w+)\s*\(([\s\S]*?)\);/gi) || []
+    const createStatements = sqlInput.match(/CREATE\s+TABLE\s+(\w+)\s*\(([\s\S]*?)\);/gi) || []
 
     createStatements.forEach((statement: string) => {
       const tableNameMatch = statement.match(/CREATE\s+TABLE\s+(\w+)/i)
@@ -129,20 +127,14 @@ export default function SqlVisualizerPage() {
       parsedTables.push({ name: tableName, columns })
     })
 
-    setTables(parsedTables)
-    setRelationships(parsedRelationships)
-  }, [])
-
-  // Parse on mount and input change
-  useEffect(() => {
-    parseSQL(sqlInput)
-  }, [sqlInput, parseSQL])
+    return { tables: parsedTables, relationships: parsedRelationships }
+  }, [sqlInput])
 
   // Export as Mermaid diagram
   const exportMermaid = useCallback(() => {
     let mermaid = 'erDiagram\n'
 
-    tables.forEach((table) => {
+    parsedTables.forEach((table) => {
       table.columns.forEach((col) => {
         const colType = col.isPrimary ? 'PK' : col.isForeign ? 'FK' : ''
         mermaid += `    ${table.name} {
@@ -150,12 +142,12 @@ ${colType ? '        ' + colType + ' ' : ''}${col.name} ${col.type}\n`
         })
       })
 
-    relationships.forEach((rel) => {
+    parsedRelationships.forEach((rel) => {
       mermaid += `    ${rel.fromTable} ||--o{ ${rel.toTable} : "${rel.fromColumn} -> ${rel.toColumn}"\n`
     })
 
     return mermaid
-  }, [tables, relationships])
+  }, [parsedTables, parsedRelationships])
 
   const handleExport = useCallback(() => {
     const mermaid = exportMermaid()
@@ -166,15 +158,15 @@ ${colType ? '        ' + colType + ' ' : ''}${col.name} ${col.type}\n`
   // Calculate positions for tables in a simple grid layout
   const tablePositions = useMemo(() => {
     const positions: Record<string, { x: number; y: number }> = {}
-    const cols = Math.ceil(Math.sqrt(tables.length))
-    tables.forEach((table, i) => {
+    const cols = Math.ceil(Math.sqrt(parsedTables.length))
+    parsedTables.forEach((table, i) => {
       positions[table.name] = {
         x: (i % cols) * 320,
         y: Math.floor(i / cols) * 250,
       }
     })
     return positions
-  }, [tables])
+  }, [parsedTables])
 
   return (
     <ToolLayout
@@ -217,7 +209,7 @@ ${colType ? '        ' + colType + ' ' : ''}${col.name} ${col.type}\n`
           ) : (
             // Visual Diagram View
             <div className="flex-1 p-6 overflow-auto relative bg-omni-bg/40">
-              {tables.length === 0 ? (
+              {parsedTables.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-omni-text/30">
                   <div className="text-center">
                     <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -228,7 +220,7 @@ ${colType ? '        ' + colType + ' ' : ''}${col.name} ${col.type}\n`
                 <div className="relative min-w-[600px] min-h-[400px]">
                   {/* Connection Lines (SVG) */}
                   <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-                    {relationships.map((rel, idx) => {
+                    {parsedRelationships.map((rel, idx) => {
                       const fromPos = tablePositions[rel.fromTable]
                       const toPos = tablePositions[rel.toTable]
                       if (!fromPos || !toPos) return null
@@ -259,7 +251,7 @@ ${colType ? '        ' + colType + ' ' : ''}${col.name} ${col.type}\n`
                   </svg>
 
                   {/* Table Cards */}
-                  {tables.map((table) => {
+                  {parsedTables.map((table) => {
                     const pos = tablePositions[table.name]
                     if (!pos) return null
 
@@ -306,13 +298,13 @@ ${colType ? '        ' + colType + ' ' : ''}${col.name} ${col.type}\n`
           )}
 
           {/* Relationships List */}
-          {relationships.length > 0 && (
+          {parsedRelationships.length > 0 && (
             <div className="border-t border-omni-text/5 p-4 bg-omni-bg/40">
               <h4 className="text-xs font-bold text-omni-text/50 uppercase tracking-wider mb-3">
-                Relationships ({relationships.length})
+                Relationships ({parsedRelationships.length})
               </h4>
               <div className="space-y-2 max-h-32 overflow-auto">
-                {relationships.map((rel, idx) => (
+                {parsedRelationships.map((rel, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-xs bg-omni-text/5 p-2 rounded">
                     <span className="font-mono font-medium text-omni-primary">{rel.fromTable}.{rel.fromColumn}</span>
                     <Link2 className="w-3 h-3 text-omni-text/30" />

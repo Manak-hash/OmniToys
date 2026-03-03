@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
-import { Clock, Copy, RefreshCw, Calendar, Globe } from 'lucide-react'
+import { Clock, Copy, Calendar, Globe, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 
 const TIMEZONES = [

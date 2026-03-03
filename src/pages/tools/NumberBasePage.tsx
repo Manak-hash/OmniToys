@@ -1,19 +1,20 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
-import { Hash, Copy, RefreshCw } from 'lucide-react'
+import { Hash, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 
 type Base = 2 | 8 | 10 | 16
 
 export default function NumberBasePage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [activeBase, setActiveBase] = useState<Base>(10)
   const [values, setValues] = useState<Record<Base, string>>({
     2: '',
     8: '',
     10: '',
     16: '',
   })
-  const [activeBase, setActiveBase] = useState<Base>(10)
   const [errors, setErrors] = useState<Record<Base, string>>({
     2: '',
     8: '',
@@ -21,12 +22,12 @@ export default function NumberBasePage() {
     16: '',
   })
 
-  const baseInfo: Record<Base, { label: string; prefix: string; description: string; color: string }> = {
+  const baseInfo: Record<Base, { label: string; prefix: string; description: string; color: string }> = useMemo(() => ({
     2: { label: 'Binary', prefix: '0b', description: 'Base-2: 0-1', color: 'text-blue-500' },
     8: { label: 'Octal', prefix: '0o', description: 'Base-8: 0-7', color: 'text-green-500' },
     10: { label: 'Decimal', prefix: '', description: 'Base-10: 0-9', color: 'text-purple-500' },
     16: { label: 'Hexadecimal', prefix: '0x', description: 'Base-16: 0-9, A-F', color: 'text-orange-500' },
-  }
+  }), [])
 
   const isValidForBase = useCallback((value: string, base: Base): boolean => {
     if (!value) return true
@@ -67,7 +68,7 @@ export default function NumberBasePage() {
         10: decimal.toString(10),
         16: decimal.toString(16).toUpperCase(),
       }
-    } catch (err) {
+    } catch {
       return { 2: '', 8: '', 10: '', 16: '' }
     }
   }, [])
@@ -91,14 +92,14 @@ export default function NumberBasePage() {
       setValues({ 2: '', 8: '', 10: '', 16: '' })
       setErrors({ 2: '', 8: '', 10: '', 16: '' })
     }
-  }, [isValidForBase, convertFromBase])
+  }, [isValidForBase, convertFromBase, baseInfo])
 
   const handleCopy = useCallback((base: Base) => {
     const prefix = baseInfo[base].prefix
     const value = values[base]
     navigator.clipboard.writeText(prefix + value)
     toast.success(`${baseInfo[base].label} copied!`)
-  }, [values])
+  }, [values, baseInfo])
 
   const handleReset = useCallback(() => {
     setValues({ 2: '', 8: '', 10: '', 16: '' })

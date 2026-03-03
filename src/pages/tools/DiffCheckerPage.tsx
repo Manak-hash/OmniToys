@@ -64,7 +64,7 @@ export default function DiffCheckerPage() {
         // Debounce calculation
         const t = setTimeout(() => {
             try {
-                let calculatedDiffs = null;
+                let calculatedDiffs = null
                 // Try WASM first
                 const module = (window as any).DiffCheckerModule
                 if (isWasmLoaded && module && module._compute_diff) {

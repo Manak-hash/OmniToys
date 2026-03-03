@@ -110,7 +110,7 @@ export default function EquationSolverPage() {
       } finally {
           setIsSolving(false)
       }
-  }, [expression])
+  }, [expression, isWasmReady])
 
   return (
     <ToolLayout

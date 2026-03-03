@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { FileUploader } from '@/components/ui/FileUploader'
 import { AssetCacheStatus } from '@/components/tools/AssetCacheStatus'
-import { Scan, Copy, RefreshCw, FileText, Loader2, Zap, Scissors, X, Check, Download, Globe } from 'lucide-react'
+import { Scan, Copy, RefreshCw, FileText, Loader2, Zap, Scissors, X, Check, Globe } from 'lucide-react'
 import { toast } from 'sonner'
 import { useOCRAssets, OCR_LANGUAGES, type OcrLanguage } from '@/hooks/useOCRAssets'
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop'
@@ -26,7 +26,6 @@ export default function OcrPage() {
     loadedLanguages,
     loadLanguage,
     getWorker,
-    clearCache,
   } = useOCRAssets('eng')
 
   // Cropping State
@@ -48,7 +47,7 @@ export default function OcrPage() {
     if (!loadedLanguages.has('eng')) {
       loadLanguage('eng')
     }
-  }, [])
+  }, [loadLanguage, loadedLanguages])
 
   const handleFileUpload = (files: File[]) => {
     if (files.length === 0) return

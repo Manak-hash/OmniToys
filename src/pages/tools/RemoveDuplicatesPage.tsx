@@ -71,12 +71,6 @@ export default function RemoveDuplicatesPage() {
     setOutput('')
   }, [])
 
-  const stats = input ? {
-    original: mode === 'lines' ? input.split('\n').filter(l => l.trim()).length : input.split(/\s+/).filter(w => w).length,
-    duplicates: 0, // Will be calculated
-    remaining: 0,
-  } : null
-
   return (
     <ToolLayout
       title="Remove Duplicate Lines"

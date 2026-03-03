@@ -10,7 +10,6 @@ type InputType = 'text' | 'file'
 export default function HashGeneratorPage() {
   const [input, setInput] = useState('')
   const [inputType, setInputType] = useState<InputType>('text')
-  const [hashType, setHashType] = useState<HashType>('sha-256')
   const [outputs, setOutputs] = useState<Record<HashType, string>>({} as Record<HashType, string>)
   const [fileName, setFileName] = useState('')
 
@@ -171,7 +170,7 @@ export default function HashGeneratorPage() {
     try {
       const textData = typeof data === 'string' ? data : new TextDecoder().decode(data)
       results['md5'] = await md5(textData)
-    } catch (e) {
+    } catch {
       results['md5'] = 'Error generating MD5'
     }
 
@@ -184,7 +183,7 @@ export default function HashGeneratorPage() {
         const hashArray = Array.from(new Uint8Array(hashBuffer))
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
         results[type] = hashHex
-      } catch (e) {
+      } catch {
         results[type] = 'Error'
       }
     }

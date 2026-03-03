@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
 import { BarChart3, Copy, Download } from 'lucide-react'
@@ -6,21 +6,11 @@ import { toast } from 'sonner'
 
 export default function CountStatsPage() {
   const [input, setInput] = useState('')
-  const [stats, setStats] = useState({
-    characters: 0,
-    charactersNoSpaces: 0,
-    words: 0,
-    lines: 0,
-    sentences: 0,
-    paragraphs: 0,
-    syllables: 0,
-    speakingTime: 0,
-    readingTime: 0,
-  })
 
-  useEffect(() => {
+  // Derive stats from input
+  const stats = useMemo(() => {
     if (!input) {
-      setStats({
+      return {
         characters: 0,
         charactersNoSpaces: 0,
         words: 0,
@@ -30,8 +20,7 @@ export default function CountStatsPage() {
         syllables: 0,
         speakingTime: 0,
         readingTime: 0,
-      })
-      return
+      }
     }
 
     // Count characters
@@ -65,7 +54,7 @@ export default function CountStatsPage() {
     const speakingTime = Math.ceil(words / 150) // 150 words per minute
     const readingTime = Math.ceil(words / 200) // 200 words per minute
 
-    setStats({
+    return {
       characters,
       charactersNoSpaces,
       words,
@@ -75,7 +64,7 @@ export default function CountStatsPage() {
       syllables,
       speakingTime,
       readingTime,
-    })
+    }
   }, [input])
 
   const handleCopy = useCallback(() => {

@@ -139,12 +139,6 @@ export default function DeviceMockupPage() {
   const [exportScale, setExportScale] = useState(1)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
-  useEffect(() => {
-    if (imageUrl && canvasRef.current) {
-      renderPreview()
-    }
-  }, [imageUrl, deviceType, backgroundType, backgroundColor, gradientColor])
-
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -163,8 +157,8 @@ export default function DeviceMockupPage() {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
     if (file && file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file)
-      setImageUrl(url)
+      const uploadedUrl = URL.createObjectURL(file)
+      setImageUrl(uploadedUrl)
       setImage(file.name)
       toast.success('Image uploaded!')
     } else {
@@ -257,6 +251,12 @@ export default function DeviceMockupPage() {
     }
     img.src = imageUrl
   }, [imageUrl, deviceType, backgroundType, backgroundColor, gradientColor])
+
+  useEffect(() => {
+    if (imageUrl && canvasRef.current) {
+      renderPreview()
+    }
+  }, [imageUrl, deviceType, backgroundType, backgroundColor, gradientColor, renderPreview])
 
   const handleDownload = useCallback(() => {
     if (!imageUrl) return

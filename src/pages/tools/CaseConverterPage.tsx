@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { ActionToolbar } from '@/components/tools/ActionToolbar'
-import { Code2, Copy, Download } from 'lucide-react'
+import { Code2, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 
 type CaseType = 'camelCase' | 'pascalCase' | 'snakeCase' | 'kebabCase' | 'constant' | 'upper' | 'lower' | 'title'

@@ -34,14 +34,11 @@ export default function FindReplacePage() {
         const matches = result.match(regex)
         count = matches ? matches.length : 0
         result = result.replace(regex, replaceStr)
-      } catch (error) {
+      } catch {
         toast.error('Invalid regular expression')
         return
       }
     } else {
-      const searchStr = caseSensitive ? findStr : findStr.toLowerCase()
-      const targetStr = caseSensitive ? replaceStr : replaceStr.toLowerCase()
-
       if (caseSensitive) {
         const matches = result.split(findStr)
         count = matches.length - 1
