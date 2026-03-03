@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
 import { FileUploader } from '@/components/ui/FileUploader'
-import { Scan, Copy, RefreshCw, FileText, Loader2, Zap, Scissors, X, Check } from 'lucide-react'
+import { AssetCacheStatus } from '@/components/tools/AssetCacheStatus'
+import { Scan, Copy, RefreshCw, FileText, Loader2, Zap, Scissors, X, Check, Download, Globe } from 'lucide-react'
 import { toast } from 'sonner'
-import { createWorker } from 'tesseract.js'
+import { useOCRAssets, OCR_LANGUAGES, type OcrLanguage } from '@/hooks/useOCRAssets'
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
@@ -16,7 +17,18 @@ export default function OcrPage() {
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState('')
   const [mode, setMode] = useState<ScanMode>('precise')
-  
+  const [selectedLang, setSelectedLang] = useState<OcrLanguage>('eng')
+
+  const {
+    isLoading: isAssetLoading,
+    progress: assetProgress,
+    status: assetStatus,
+    loadedLanguages,
+    loadLanguage,
+    getWorker,
+    clearCache,
+  } = useOCRAssets('eng')
+
   // Cropping State
   const [crop, setCrop] = useState<Crop>({
     unit: '%',
@@ -28,20 +40,13 @@ export default function OcrPage() {
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null)
   const [showCropper, setShowCropper] = useState(false)
 
-  const workerRef = useRef<Tesseract.Worker | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const imgRef = useRef<HTMLImageElement | null>(null)
 
-  const cleanupWorker = async () => {
-    if (workerRef.current) {
-      await workerRef.current.terminate()
-      workerRef.current = null
-    }
-  }
-
+  // Load language on mount
   useEffect(() => {
-    return () => {
-      cleanupWorker()
+    if (!loadedLanguages.has('eng')) {
+      loadLanguage('eng')
     }
   }, [])
 
@@ -68,8 +73,7 @@ export default function OcrPage() {
       console.warn('Laboratory Warning: Rendered image ref not found.')
       return imageSrc
     }
-    
-    // Use the actual rendered size of the img element to calculate scaling
+
     const scaleX = image.naturalWidth / renderedImg.clientWidth
     const scaleY = image.naturalHeight / renderedImg.clientHeight
 
@@ -77,25 +81,18 @@ export default function OcrPage() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return imageSrc
 
-    // Define source coordinates in the original image
-    const sourceX = pixelCrop.x * scaleX
-    const sourceY = pixelCrop.y * scaleY
-    const sourceWidth = pixelCrop.width * scaleX
-    const sourceHeight = pixelCrop.height * scaleY
-
-    // Set canvas to mapped size * upscale multiplier
-    canvas.width = sourceWidth * scale
-    canvas.height = sourceHeight * scale
+    canvas.width = pixelCrop.width * scaleX * scale
+    canvas.height = pixelCrop.height * scaleY * scale
 
     ctx.imageSmoothingEnabled = true
     ctx.imageSmoothingQuality = 'high'
 
     ctx.drawImage(
       image,
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
+      pixelCrop.x * scaleX,
+      pixelCrop.y * scaleY,
+      pixelCrop.width * scaleX,
+      pixelCrop.height * scaleY,
       0,
       0,
       canvas.width,
@@ -111,7 +108,7 @@ export default function OcrPage() {
       img.onload = () => {
         const canvas = canvasRef.current
         if (!canvas) return resolve(imageSrc)
-        
+
         const ctx = canvas.getContext('2d')
         if (!ctx) return resolve(imageSrc)
 
@@ -125,7 +122,7 @@ export default function OcrPage() {
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i], g = data[i+1], b = data[i+2]
           const gray = 0.299 * r + 0.587 * g + 0.114 * b
-          const threshold = 120 
+          const threshold = 120
           const value = gray > threshold ? 255 : 0
           data[i] = data[i+1] = data[i+2] = value
         }
@@ -139,37 +136,35 @@ export default function OcrPage() {
 
   const runOcr = async () => {
     if (!image) return
-    
+
+    // Ensure language is loaded
+    if (!loadedLanguages.has(selectedLang)) {
+      await loadLanguage(selectedLang)
+    }
+
     setIsProcessing(true)
     setProgress(0)
     setStatus('Initializing Laboratory Module...')
 
     try {
       let processingImage = image
-      
+
       // Mode handling
       if (mode === 'surgical' && completedCrop) {
         setStatus('Isolating Surgical Region...')
         processingImage = await getCroppedImage(image, completedCrop, 2)
       }
-      
+
       if (mode === 'precise' || mode === 'surgical') {
         setStatus('Calibrating Optics (Preprocessing)...')
         processingImage = await preprocessImage(processingImage)
       }
 
-      const worker = await createWorker('eng', 1, {
-        logger: (m) => {
-          if (m.status === 'recognizing text') {
-            setProgress(Math.round(m.progress * 100))
-            setStatus('Synthesizing Text Content...')
-          } else {
-            setStatus(`${m.status.charAt(0).toUpperCase() + m.status.slice(1)}...`)
-          }
-        },
-      })
-      workerRef.current = worker
-      
+      const worker = getWorker()
+      if (!worker) {
+        throw new Error('OCR worker not ready')
+      }
+
       const { data: { text: resultText } } = await worker.recognize(processingImage)
       setText(resultText)
       setShowCropper(false)
@@ -189,15 +184,22 @@ export default function OcrPage() {
     toast.success('Text copied to clipboard!')
   }
 
+  const handleLanguageChange = async (lang: OcrLanguage) => {
+    setSelectedLang(lang)
+    if (!loadedLanguages.has(lang)) {
+      await loadLanguage(lang)
+    }
+  }
+
   return (
     <ToolLayout
       title="OCR Scanner Pro"
-      description="Advanced text synthesis module. Use Surgical mode to isolate text and eliminate graphic noise."
+      description="Advanced text synthesis module. Supports multiple languages with cached assets."
       icon={<Scan className="w-8 h-8" />}
       actions={
         <div className="flex gap-2">
           {text && (
-            <button 
+            <button
               onClick={copyToClipboard}
               className="flex items-center gap-2 px-3 py-1.5 bg-omni-text/10 text-omni-text hover:bg-omni-text/20 rounded-lg transition-colors font-medium text-sm"
             >
@@ -205,7 +207,7 @@ export default function OcrPage() {
             </button>
           )}
           {image && !isProcessing && (
-            <button 
+            <button
               onClick={runOcr}
               className="flex items-center gap-2 px-3 py-1.5 bg-omni-primary/10 text-omni-primary hover:bg-omni-primary/20 rounded-lg transition-colors font-medium text-sm"
             >
@@ -216,82 +218,129 @@ export default function OcrPage() {
       }
     >
       <canvas ref={canvasRef} className="hidden" />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full min-h-[500px]">
-        {/* Left: Input */}
-        <div className="space-y-6">
-          <div className="space-y-4">
-             <div className="flex flex-wrap items-center justify-between gap-4">
-                <label className="text-sm font-black uppercase tracking-widest text-omni-text/30">Target Image</label>
-                <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5 overflow-x-auto no-scrollbar">
-                   {[
-                     { id: 'fast', label: 'FAST', icon: null },
-                     { id: 'precise', label: 'PRECISE', icon: <Zap className="w-3 h-3" /> },
-                     { id: 'surgical', label: 'SURGICAL', icon: <Scissors className="w-3 h-3" /> }
-                   ].map(m => (
-                     <button 
-                       key={m.id}
-                       onClick={() => {
-                         setMode(m.id as ScanMode)
-                         if (m.id === 'surgical' && image) setShowCropper(true)
-                       }}
-                       className={`px-3 py-1 rounded-lg text-[10px] font-black tracking-tight transition-all flex items-center gap-1.5 whitespace-nowrap ${mode === m.id ? 'bg-omni-primary text-white shadow-lg' : 'text-omni-text/40 hover:text-omni-text'}`}
-                     >
-                       {m.icon} {m.label}
-                     </button>
-                   ))}
-                </div>
-             </div>
-             
-             <div className="aspect-video relative rounded-3xl overflow-hidden glass-card group flex items-center justify-center bg-black/20 border-white/5">
-                {image ? (
-                  <>
-                    <img 
-                      src={image} 
-                      alt="Preview" 
-                      className="w-full h-full object-contain p-4 transition-all duration-500" 
-                    />
-                    {mode === 'surgical' && !isProcessing && (
-                      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-4 group-hover:bg-black/60 transition-colors z-10">
-                         <button 
-                           onClick={() => setShowCropper(true)}
-                           className="flex items-center gap-2 px-8 py-4 bg-omni-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-110 transition-transform shadow-2xl animate-in zoom-in duration-300"
-                         >
-                           <Scissors className="w-5 h-5" /> Adjust Region
-                         </button>
-                         <p className="text-[10px] text-white/40 font-mono italic tracking-tight">Freeform selection active.</p>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <FileUploader 
-                    onFileSelect={(file) => handleFileUpload([file])} 
-                    accept="image/*"
-                    className="h-full border-none"
-                  />
-                )}
-                {image && !isProcessing && !showCropper && (
-                  <button 
-                    onClick={() => { setImage(null); setText(''); setShowCropper(false); }}
-                    className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-omni-primary/80 text-white rounded-xl transition-colors backdrop-blur-md z-20"
+
+      <div className="space-y-6">
+        {/* Language Selection & Cache Status */}
+        <div className="p-4 bg-omni-text/5 rounded-xl space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-omni-text/50 uppercase flex items-center gap-2">
+                <Globe className="w-4 h-4" /> Language
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(OCR_LANGUAGES).slice(0, 6).map(([id, lang]) => (
+                  <button
+                    key={id}
+                    onClick={() => handleLanguageChange(id as OcrLanguage)}
+                    disabled={isAssetLoading || isProcessing}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      selectedLang === id
+                        ? 'bg-omni-primary text-white shadow-lg shadow-omni-primary/20'
+                        : loadedLanguages.has(id as OcrLanguage)
+                        ? 'bg-green-500/10 text-green-500 border border-green-500/20'
+                        : 'bg-omni-text/10 text-omni-text/60 hover:bg-omni-text/20'
+                    } ${isAssetLoading || isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    Change Image
+                    {lang.nativeName}
                   </button>
-                )}
-             </div>
+                ))}
+              </div>
+            </div>
+
+            {selectedLang && (
+              <AssetCacheStatus
+                status={loadedLanguages.has(selectedLang) ? 'cached' : 'uncached'}
+                size={OCR_LANGUAGES[selectedLang].size}
+                progress={assetProgress}
+                onDownload={!loadedLanguages.has(selectedLang) && !isAssetLoading ? () => loadLanguage(selectedLang) : undefined}
+              />
+            )}
+          </div>
+
+          {isAssetLoading && (
+            <div className="flex items-center gap-3 text-xs text-omni-text/60">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{assetStatus}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full min-h-[500px]">
+          {/* Left: Input */}
+          <div className="space-y-6">
+            <div className="space-y-4">
+               <div className="flex flex-wrap items-center justify-between gap-4">
+                  <label className="text-sm font-black uppercase tracking-widest text-omni-text/30">Target Image</label>
+                  <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/5 overflow-x-auto no-scrollbar">
+                     {[
+                       { id: 'fast', label: 'FAST', icon: null },
+                       { id: 'precise', label: 'PRECISE', icon: <Zap className="w-3 h-3" /> },
+                       { id: 'surgical', label: 'SURGICAL', icon: <Scissors className="w-3 h-3" /> }
+                     ].map(m => (
+                       <button
+                         key={m.id}
+                         onClick={() => {
+                           setMode(m.id as ScanMode)
+                           if (m.id === 'surgical' && image) setShowCropper(true)
+                         }}
+                         className={`px-3 py-1 rounded-lg text-[10px] font-black tracking-tight transition-all flex items-center gap-1.5 whitespace-nowrap ${mode === m.id ? 'bg-omni-primary text-white shadow-lg' : 'text-omni-text/40 hover:text-omni-text'}`}
+                       >
+                         {m.icon} {m.label}
+                       </button>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="aspect-video relative rounded-3xl overflow-hidden glass-card group flex items-center justify-center bg-black/20 border-white/5">
+                  {image ? (
+                    <>
+                      <img
+                        src={image}
+                        alt="Preview"
+                        className="w-full h-full object-contain p-4 transition-all duration-500"
+                      />
+                      {mode === 'surgical' && !isProcessing && (
+                        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-4 group-hover:bg-black/60 transition-colors z-10">
+                           <button
+                             onClick={() => setShowCropper(true)}
+                             className="flex items-center gap-2 px-8 py-4 bg-omni-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:scale-110 transition-transform shadow-2xl animate-in zoom-in duration-300"
+                           >
+                             <Scissors className="w-5 h-5" /> Adjust Region
+                           </button>
+                           <p className="text-[10px] text-white/40 font-mono italic tracking-tight">Freeform selection active.</p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <FileUploader
+                      onFileSelect={(file) => handleFileUpload([file])}
+                      accept="image/*"
+                      className="h-full border-none"
+                    />
+                  )}
+                  {image && !isProcessing && (
+                    <button
+                      onClick={() => { setImage(null); setText(''); setShowCropper(false); }}
+                      className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-omni-primary/80 text-white rounded-xl transition-colors backdrop-blur-md z-20"
+                    >
+                      Change Image
+                    </button>
+                  )}
+               </div>
           </div>
 
           {!image && (
             <div className="p-6 rounded-3xl border border-dashed border-omni-text/10 text-center space-y-2">
                <Scan className="w-10 h-10 text-omni-text/10 mx-auto" />
-               <p className="text-xs text-omni-text/40 font-mono italic">Upload a doc to initialize the WASM engine.</p>
+               <p className="text-xs text-omni-text/40 font-mono italic">Upload a doc to initialize the OCR engine.</p>
             </div>
           )}
 
           {image && !isProcessing && !text && !showCropper && (
-            <button 
+            <button
               onClick={runOcr}
-              className="w-full py-5 bg-omni-primary text-white rounded-[24px] font-black uppercase tracking-widest text-lg transition-all hover:scale-[1.02] hover:neon-glow flex items-center justify-center gap-3"
+              disabled={!loadedLanguages.has(selectedLang)}
+              className="w-full py-5 bg-omni-primary text-white rounded-[24px] font-black uppercase tracking-widest text-lg transition-all hover:scale-[1.02] hover:neon-glow flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Scan className="w-6 h-6" /> Start Local Extraction
             </button>
@@ -300,9 +349,9 @@ export default function OcrPage() {
           {isProcessing && (
             <div className="p-8 rounded-[32px] glass-card space-y-6 relative overflow-hidden">
                <div className="absolute top-0 left-0 h-1 bg-omni-primary/20 w-full overflow-hidden">
-                  <div 
-                    className="h-full bg-omni-primary transition-all duration-500 shadow-[0_0_10px_rgba(223,28,38,0.8)]" 
-                    style={{ width: `${progress}%` }} 
+                  <div
+                    className="h-full bg-omni-primary transition-all duration-500 shadow-[0_0_10px_rgba(223,28,38,0.8)]"
+                    style={{ width: `${progress}%` }}
                   />
                </div>
                <div className="flex items-center gap-4">
@@ -314,14 +363,14 @@ export default function OcrPage() {
                     <p className="text-sm text-omni-text/40 mt-1 font-bold">{progress}% Complete</p>
                   </div>
                </div>
-               <p className="text-[10px] text-omni-text/20 uppercase tracking-[0.2em] font-black italic">Precision scanning active. Ignoring external noise.</p>
+               <p className="text-[10px] text-omni-text/20 uppercase tracking-[0.2em] font-black italic">Precision scanning active. Using {OCR_LANGUAGES[selectedLang].name} language pack.</p>
             </div>
           )}
-          
+
           <div className="p-4 rounded-2xl bg-omni-text/5 border border-white/5 space-y-2">
              <p className="text-[10px] font-black text-omni-text/40 uppercase tracking-widest">Lab Tip</p>
              <p className="text-[10px] text-omni-text/30 font-medium leading-relaxed">
-               {mode === 'surgical' 
+               {mode === 'surgical'
                  ? "Surgical mode allows you to manually isolate text strings. Best for logos and complex graphic layouts."
                  : mode === 'precise'
                  ? "Precise mode uses optical filters to boost text contrast and suppress light background noise."
@@ -337,7 +386,7 @@ export default function OcrPage() {
           </label>
           <div className="flex-1 min-h-[300px] glass-card rounded-[32px] p-6 relative group">
              {text ? (
-               <textarea 
+               <textarea
                  value={text}
                  onChange={(e) => setText(e.target.value)}
                  className="w-full h-full bg-transparent border-none focus:outline-none text-omni-text/80 font-mono text-sm leading-relaxed resize-none no-scrollbar"
@@ -352,7 +401,7 @@ export default function OcrPage() {
         </div>
       </div>
 
-      {/* SURGICAL WORKBENCH - Moved to root to escape containing blocks */}
+      {/* SURGICAL WORKBENCH */}
       {showCropper && image && (
         <div className="fixed inset-0 flex flex-col items-center justify-center bg-omni-bg/95 backdrop-blur-2xl z-[100] p-4 lg:p-10 animate-in fade-in duration-500">
           <div className="w-full max-w-5xl h-full flex flex-col space-y-6">
@@ -361,7 +410,7 @@ export default function OcrPage() {
                    <h2 className="text-2xl font-black text-white font-mono tracking-tighter">SURGICAL_SELECTION</h2>
                    <p className="text-[10px] text-omni-primary font-black uppercase tracking-[0.2em] mt-1">Status: Calibrating Focal Point</p>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowCropper(false)}
                   className="p-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl border border-white/10 transition-all hover:scale-110"
                 >
@@ -378,10 +427,10 @@ export default function OcrPage() {
                    onComplete={c => setCompletedCrop(c)}
                    className="shadow-2xl"
                  >
-                   <img 
+                   <img
                      ref={imgRef}
-                     src={image} 
-                     alt="Crop source" 
+                     src={image}
+                     alt="Crop source"
                      className="block max-h-[70vh] w-auto h-auto"
                      onLoad={() => {
                         // Reset crop to center on load if needed
@@ -390,12 +439,12 @@ export default function OcrPage() {
                  </ReactCrop>
                </div>
              </div>
-            
+
              <div className="flex items-center justify-center gap-6 py-6 pb-2">
                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/10" />
                <div className="flex flex-col items-center gap-4">
-                  <button 
-                    onClick={runOcr} 
+                  <button
+                    onClick={runOcr}
                     disabled={!completedCrop || (completedCrop.width === 0 && completedCrop.height === 0)}
                     className="flex items-center gap-4 py-5 px-20 bg-omni-primary text-white rounded-[24px] font-black uppercase tracking-[0.2em] text-sm hover:scale-105 transition-all shadow-[0_0_40px_rgba(223,28,38,0.5)] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed group"
                   >
@@ -408,6 +457,7 @@ export default function OcrPage() {
           </div>
         </div>
       )}
+      </div>
     </ToolLayout>
   )
 }

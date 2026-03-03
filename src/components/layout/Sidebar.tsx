@@ -183,16 +183,16 @@ export function Sidebar() {
                <div className="relative z-10 space-y-4">
                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                    <span className="text-omni-text/30 font-mono">Synthesis</span>
-                   <span className="text-omni-primary neon-text font-mono">30/50 UNIT</span>
+                   <span className="text-omni-primary neon-text font-mono">70/70 UNIT</span>
                  </div>
                  <div className="h-1 bg-white/5 rounded-full overflow-hidden flex">
-                   <div className="h-full bg-omni-primary neon-glow-primary w-[60%] transition-all duration-1000 ease-in-out" />
+                   <div className="h-full bg-omni-primary neon-glow-primary w-[95%] transition-all duration-1000 ease-in-out" />
                  </div>
                  <div className="flex items-center gap-2.5 text-[9px] text-omni-text/40 font-black uppercase tracking-[0.1em] font-mono">
                    <div className="flex items-center gap-1.5">
                      <div className="flex items-center gap-1.5">
                        <div className="w-1.5 h-1.5 bg-omni-primary rounded-full" />
-                       <span>v0.3.0</span>
+                       <span>v0.5.0</span>
                      </div>
                      <span className="w-px h-2 bg-white/10" />
                      <span className="text-omni-text/20 font-bold">NODE_01</span>

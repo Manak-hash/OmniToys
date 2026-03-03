@@ -12,7 +12,8 @@ export default defineConfig([
     "build",
     "emsdk/**",
     "node_modules/**",
-    "mcp-servers/**"
+    "mcp-servers/**",
+    "public/**/*.js"
   ]),
   {
     files: ["**/*.{ts,tsx}"],

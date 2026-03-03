@@ -41,6 +41,57 @@ const TextAnalysisPage = lazy(() => import('./pages/tools/TextAnalysisPage'))
 const CurlToFetchPage = lazy(() => import('./pages/tools/CurlToFetchPage'))
 const UnitConverterPage = lazy(() => import('./pages/tools/UnitConverterPage'))
 
+// New Phase 1 tools
+const AlgorithmVizPage = lazy(() => import('./pages/tools/AlgorithmVizPage'))
+const SqlVisualizerPage = lazy(() => import('./pages/tools/SqlVisualizerPage'))
+const MarkdownEditorPage = lazy(() => import('./pages/tools/MarkdownEditorPage'))
+const AudioWaveformPage = lazy(() => import('./pages/tools/AudioWaveformPage'))
+const ColorPickerPage = lazy(() => import('./pages/tools/ColorPickerPage'))
+const MetaTagPage = lazy(() => import('./pages/tools/MetaTagPage'))
+const ZIndexPage = lazy(() => import('./pages/tools/ZIndexPage'))
+const BundleSizePage = lazy(() => import('./pages/tools/BundleSizePage'))
+const TailwindPalettePage = lazy(() => import('./pages/tools/TailwindPalettePage'))
+
+// Security & Mobile tools
+const PiiScrubberPage = lazy(() => import('./pages/tools/PiiScrubberPage'))
+const MetadataStripperPage = lazy(() => import('./pages/tools/MetadataStripperPage'))
+const DeviceMockupPage = lazy(() => import('./pages/tools/DeviceMockupPage'))
+
+// Additional new tools
+const LottiePreviewerPage = lazy(() => import('./pages/tools/LottiePreviewerPage'))
+const CssToTailwindPage = lazy(() => import('./pages/tools/CssToTailwindPage'))
+const MdToPdfPage = lazy(() => import('./pages/tools/MdToPdfPage'))
+const ManifestBuilderPage = lazy(() => import('./pages/tools/ManifestBuilderPage'))
+
+// Additional encoder/decoder tools
+const HtmlEntityPage = lazy(() => import('./pages/tools/HtmlEntityPage'))
+const UrlEncoderPage = lazy(() => import('./pages/tools/UrlEncoderPage'))
+const LoremPage = lazy(() => import('./pages/tools/LoremPage'))
+
+// Additional utility tools
+const UnicodePage = lazy(() => import('./pages/tools/UnicodePage'))
+const CaseConverterPage = lazy(() => import('./pages/tools/CaseConverterPage'))
+
+// Additional utility tools
+const ReverseTextPage = lazy(() => import('./pages/tools/ReverseTextPage'))
+const CountStatsPage = lazy(() => import('./pages/tools/CountStatsPage'))
+const SortLinesPage = lazy(() => import('./pages/tools/SortLinesPage'))
+const RemoveDuplicatesPage = lazy(() => import('./pages/tools/RemoveDuplicatesPage'))
+const FindReplacePage = lazy(() => import('./pages/tools/FindReplacePage'))
+const JsonFormatterPage = lazy(() => import('./pages/tools/JsonFormatterPage'))
+const HashGeneratorPage = lazy(() => import('./pages/tools/HashGeneratorPage'))
+const JsonCsvPage = lazy(() => import('./pages/tools/JsonCsvPage'))
+const NumberBasePage = lazy(() => import('./pages/tools/NumberBasePage'))
+const SvgPatternPage = lazy(() => import('./pages/tools/SvgPatternPage'))
+const PasswordLeakPage = lazy(() => import('./pages/tools/PasswordLeakPage'))
+const HeaderOraclePage = lazy(() => import('./pages/tools/HeaderOraclePage'))
+const PortOraclePage = lazy(() => import('./pages/tools/PortOraclePage'))
+const SSLSentinelPage = lazy(() => import('./pages/tools/SSLSentinelPage'))
+const NeuralPromptPage = lazy(() => import('./pages/tools/NeuralPromptPage'))
+const ApiMockPage = lazy(() => import('./pages/tools/ApiMockPage'))
+const GitCheatPage = lazy(() => import('./pages/tools/GitCheatPage'))
+const BackgroundRemoverPage = lazy(() => import('./pages/tools/BackgroundRemoverPage'))
+
 // Loading fallback component
 function LoadingFallback() {
   return (
@@ -310,6 +361,324 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <UnitConverterPage />
+          </Suspense>
+        ),
+      },
+      // New Phase 1 tools
+      {
+        path: 'tools/algorithm-viz',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AlgorithmVizPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/sql-visualizer',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SqlVisualizerPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/markdown-editor',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <MarkdownEditorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/waveform',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <AudioWaveformPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/color-picker',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ColorPickerPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/meta-tags',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <MetaTagPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/z-index',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ZIndexPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/bundle-size',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <BundleSizePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/tailwind-palette',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <TailwindPalettePage />
+          </Suspense>
+        ),
+      },
+      // Security & Mobile tools
+      {
+        path: 'tools/pii-scrubber',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PiiScrubberPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/metadata-stripper',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <MetadataStripperPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/device-mockup',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <DeviceMockupPage />
+          </Suspense>
+        ),
+      },
+      // Additional new tools
+      {
+        path: 'tools/lottie',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <LottiePreviewerPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/css-to-tailwind',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CssToTailwindPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/md-to-pdf',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <MdToPdfPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/manifest-builder',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ManifestBuilderPage />
+          </Suspense>
+        ),
+      },
+      // Additional encoder/decoder tools
+      {
+        path: 'tools/html-entity',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <HtmlEntityPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/url-encoder',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <UrlEncoderPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/lorem-ipsum',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <LoremPage />
+          </Suspense>
+        ),
+      },
+      // Additional utility tools
+      {
+        path: 'tools/unicode',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <UnicodePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/case-converter',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CaseConverterPage />
+          </Suspense>
+        ),
+      },
+      // Additional utility tools
+      {
+        path: 'tools/reverse-text',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ReverseTextPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/count-stats',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <CountStatsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/sort-lines',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SortLinesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/remove-duplicates',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <RemoveDuplicatesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/find-replace',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <FindReplacePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/json-formatter',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <JsonFormatterPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/hash-generator',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <HashGeneratorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/json-csv',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <JsonCsvPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/number-base',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <NumberBasePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/svg-pattern',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SvgPatternPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/password-leak',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PasswordLeakPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/header-oracle',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <HeaderOraclePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/port-oracle',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PortOraclePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/ssl-sentinel',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <SSLSentinelPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/neural-prompt',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <NeuralPromptPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/api-mock',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <ApiMockPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/git-cheat',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <GitCheatPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'tools/bg-remover',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <BackgroundRemoverPage />
           </Suspense>
         ),
       },

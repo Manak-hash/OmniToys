@@ -33,27 +33,41 @@ export default function EquationSolverPage() {
   // Load WASM script
   useEffect(() => {
     const scriptId = 'wasm-eq-solver';
-    if (document.getElementById(scriptId)) return;
-
-    // Pre-define Module with initialization hook
-    (window as any).Module = {
-        onRuntimeInitialized: () => {
-            console.log('[WASM] Equation Solver Core Ready');
+    if (document.getElementById(scriptId)) {
+        // Script already loaded, check if module exists
+        if ((window as any).EquationSolverModule) {
             setIsWasmReady(true);
         }
-    };
+        return;
+    }
 
     const script = document.createElement('script')
     script.id = scriptId;
     script.src = '/wasm/equation_solver.js'
     script.async = true
+    script.onload = async () => {
+        console.log('[WASM] Script loaded, initializing module...')
+        try {
+            const EquationSolver = (window as any).EquationSolver
+            if (typeof EquationSolver === 'function') {
+                const module = await EquationSolver()
+                ;(window as any).EquationSolverModule = module
+                console.log('[WASM] Equation Solver module ready')
+                setIsWasmReady(true)
+            } else {
+                throw new Error('EquationSolver not found on window')
+            }
+        } catch (err) {
+            console.error('[WASM] Failed to initialize EquationSolver:', err)
+        }
+    }
+    script.onerror = () => {
+        console.error('[WASM] Failed to load script')
+    }
     document.body.appendChild(script)
 
     return () => {
-      // Optimization: Preserve module if we navigate back, 
-      // but if we really want to clean up:
-      // document.body.removeChild(script)
-      // delete (window as any).Module;
+      // Optimization: Preserve module if we navigate back
     }
   }, [])
 
@@ -61,21 +75,17 @@ export default function EquationSolverPage() {
       if (!expression) return
       setIsSolving(true)
       setTrace(["[ROOT_CA] Accessing neural processor...", "[SYS] Loading Newton-Raphson module..."])
-      
+
       try {
           const start = performance.now()
           await new Promise(r => setTimeout(r, 800)) // Simulate heavy computation for WOW
-          
+
           let solution: number | string
           // Check if WASM module is loaded
-          if ((window as any).Module && (window as any).Module.ccall) {
+          const module = (window as any).EquationSolverModule
+          if (isWasmReady && module && module._solve_equation) {
               setTrace(prev => [...prev, "[WASM] Executing C++ core..."])
-              solution = (window as any).Module.ccall(
-                  'solve_equation',
-                  'number',
-                  ['string'],
-                  [expression]
-              )
+              solution = module._solve_equation(expression)
           } else {
              setTrace(prev => [...prev, "[FALLBACK] Loading TS polyfill..."])
              const { solveEquation } = await import('@/utils/mathSolver')

@@ -39,6 +39,29 @@ export default defineConfig({
           }
         ]
       },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm}'],
+        // Increase limit to cache large WASM files (ONNX runtime)
+        maximumFileSizeToCacheInBytes: 50 * 1024 * 1024, // 50MB
+        // Cache external model URLs from HuggingFace
+        // These will be downloaded once and cached for offline use
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/huggingface\.co\/.*\.onnx/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'onnx-models',
+              expiration: {
+                maxEntries: 5, // Cache both RMBG and BiRefNet
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
       devOptions: {
         enabled: true
       }
@@ -49,7 +72,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-   server: {
+  server: {
     host: true,
   },
 });

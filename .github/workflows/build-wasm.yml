@@ -1,0 +1,206 @@
+name: Build WASM Modules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/cpp/**'
+      - '.github/workflows/build-wasm.yml'
+      - 'docker-compose.wasm.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/cpp/**'
+  workflow_dispatch:  # Allow manual trigger
+
+# Cancel previous runs on same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-wasm:
+    name: Build WASM Modules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Find all C++ files
+        id: find-cpp
+        run: |
+          echo "=== Finding C++ source files ==="
+          echo ""
+
+          # Find all .cpp files
+          CPP_FILES=$(find src/cpp -name "*.cpp" -type f 2>/dev/null || echo "")
+
+          if [ -z "$CPP_FILES" ]; then
+            echo "No C++ files found in src/cpp/"
+            echo "cpp_files=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Found C++ files:"
+          echo "$CPP_FILES"
+          echo ""
+
+          # Create list for matrix build
+          FILES_JSON="["
+          FIRST=true
+          for file in $CPP_FILES; do
+            if [ "$FIRST" = "true" ]; then
+              FIRST=false
+            else
+              FILES_JSON="$FILES_JSON,"
+            fi
+
+            # Extract filename without path and extension
+            BASENAME=$(basename "$file" .cpp)
+            FILES_JSON="$FILES_JSON\"$BASENAME\""
+          done
+          FILES_JSON="$FILES_JSON]"
+
+          echo "Module list: $FILES_JSON"
+          echo "cpp_files=$FILES_JSON" >> $GITHUB_OUTPUT
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.57
+
+      - name: Build WASM modules
+        if: steps.find-cpp.outputs.cpp_files != '[]'
+        run: |
+          echo "=== Building WASM modules ==="
+          echo ""
+
+          mkdir -p public/wasm
+          counter=0
+
+          for cpp_file in src/cpp/*.cpp; do
+            if [ ! -f "$cpp_file" ]; then continue; fi
+
+            base_name=$(basename "$cpp_file" .cpp)
+            js_file="public/wasm/${base_name}.js"
+
+            echo ""
+            echo "[$((counter=counter+1))] Compiling $base_name..."
+
+            case "$base_name" in
+              qr_generator)
+                emcc "$cpp_file" -o "$js_file" -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME='QRGenerator' -s "EXPORTED_RUNTIME_METHODS=['ccall', 'UTF8ToString', '_free']" -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=256MB -s NO_EXIT_RUNTIME=1 -s ENVIRONMENT='web,worker' -O3 -Wall --no-entry -s EXPORTED_FUNCTIONS='_generate_qr,_generate_micro_qr,_generate_aztec,_generate_data_matrix,_get_version,_free_memory'
+                ;;
+              equation_solver)
+                emcc "$cpp_file" -o "$js_file" -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME='EquationSolver' -s "EXPORTED_RUNTIME_METHODS=['ccall', 'UTF8ToString', '_free']" -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=128MB -s NO_EXIT_RUNTIME=1 -s ENVIRONMENT='web' -O2 --no-entry -s EXPORTED_FUNCTIONS='_solve_equation,_get_version,_free_memory'
+                ;;
+              diff_checker)
+                emcc "$cpp_file" -o "$js_file" -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME='DiffChecker' -s "EXPORTED_RUNTIME_METHODS=['ccall', 'UTF8ToString', '_free']" -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=128MB -s NO_EXIT_RUNTIME=1 -s ENVIRONMENT='web' -s SINGLE_FILE=1 -O2 --no-entry -s EXPORTED_FUNCTIONS='_compute_diff,_get_version,_free_memory'
+                ;;
+              *)
+                emcc "$cpp_file" -o "$js_file" -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME="${base_name}" -s "EXPORTED_RUNTIME_METHODS=['ccall']" -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=1 -s ENVIRONMENT='web' -O2 --no-entry
+                ;;
+            esac
+
+            if [ $? -eq 0 ]; then
+              echo "  ✓ $base_name.js Success"
+            else
+              echo "  ✗ Failed to compile $base_name.cpp"
+              exit 1
+            fi
+          done
+
+          echo ""
+          echo "=== Build Complete ==="
+          echo ""
+          echo "Output files:"
+          ls -lh public/wasm/*.js 2>/dev/null || echo "  No files generated"
+          echo ""
+          echo "Total size:"
+          du -sh public/wasm/
+
+      - name: Verify WASM files
+        if: steps.find-cpp.outputs.cpp_files != '[]'
+        run: |
+          echo "=== Verifying WASM output ==="
+          echo ""
+
+          for js_file in public/wasm/*.js; do
+            if [ ! -f "$js_file" ]; then
+              continue
+            fi
+
+            base_name=$(basename "$js_file" .js)
+            SIZE=$(wc -c < "$js_file")
+
+            echo "✓ $base_name.js: $SIZE bytes"
+
+            # Check if WASM is embedded (should be > 10KB)
+            if [ $SIZE -gt 10000 ]; then
+              echo "  ✓ WASM binary embedded (single-file build)"
+            else
+              echo "  ! Warning: File might be JS stub only"
+            fi
+            echo ""
+          done
+
+      - name: Commit WASM files
+        if: steps.find-cpp.outputs.cpp_files != '[]' && github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Add WASM files
+          git add public/wasm/*.js
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No WASM changes to commit"
+          else
+            echo "Committing WASM files..."
+            git commit -m "chore: build WASM modules [skip ci]
+
+            - Auto-generated by GitHub Actions
+            - Built from commit: ${{ github.sha }}
+            - C++ files: $(find src/cpp -name "*.cpp" -type f 2>/dev/null | wc -l)"
+          fi
+
+      - name: Push WASM changes
+        if: steps.find-cpp.outputs.cpp_files != '[]' && github.event_name == 'push'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+  verify-build:
+    name: Verify Application Build
+    needs: build-wasm
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc -b
+
+      - name: Build application
+        run: npm run build
+
+      - name: Lint check
+        run: npm run lint

@@ -32,12 +32,17 @@ dist-ssr
 .env.development.local
 
 # WASM build artifacts (generated from src/cpp/*)
-public/wasm/
-*.wasm
-*.wasm.map
+# Commit both .js glue and .wasm binary files
+!public/wasm/*.js
+!public/wasm/*.wasm
 
 # Emscripten SDK (local C++ to WASM compiler)
 emsdk/
+
+# ONNX models (loaded from HuggingFace CDN, not in git)
+# Models are cached by PWA after first download
+public/models/
+*.onnx
 
 # Build logs
 build_log.txt

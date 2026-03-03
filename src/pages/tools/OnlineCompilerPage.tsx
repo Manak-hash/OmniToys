@@ -75,26 +75,49 @@ export default function OnlineCompilerPage() {
 
       // Load WASM script
       const scriptId = 'wasm-omni-native'
-      if (document.getElementById(scriptId)) return
+      const script = document.getElementById(scriptId)
 
-      // Pre-define Module with initialization hook
-      (window as any).Module = {
-          onRuntimeInitialized: () => {
-              console.log('[WASM] OmniNative Core Ready')
-              setIsWasmReady(true)
-              setOutput(prev => [...prev, '> OmniNative Virtual Machine: READY.'])
+      const initModule = async () => {
+          try {
+              const OmniNative = (window as any).OmniNative
+              if (typeof OmniNative === 'function') {
+                  const module = await OmniNative()
+                  ;(window as any).OmniNativeModule = module
+                  console.log('[WASM] OmniNative module ready, ccall:', typeof module.ccall)
+                  setIsWasmReady(true)
+                  setOutput(prev => [...prev, '> OmniNative Virtual Machine: READY.'])
+              } else {
+                  throw new Error('OmniNative not found on window')
+              }
+          } catch (err) {
+              console.error('[WASM] Failed to initialize OmniNative:', err)
+              setOutput(prev => [...prev, '> [WARNING] WASM failed to load, using fallback.'])
           }
       }
 
-      const script = document.createElement('script')
-      script.id = scriptId
-      script.src = '/wasm/omni_native.js'
-      script.async = true
-      document.body.appendChild(script)
+      if (!script) {
+          // Script not loaded yet
+          const newScript = document.createElement('script')
+          newScript.id = scriptId
+          newScript.src = '/wasm/omni_native.js'
+          newScript.async = true
+          newScript.onload = () => initModule()
+          newScript.onerror = () => {
+              console.error('[WASM] Failed to load script')
+              setOutput(prev => [...prev, '> [WARNING] WASM script failed to load.'])
+          }
+          document.body.appendChild(newScript)
+      } else if (!(window as any).OmniNativeModule) {
+          // Script exists but module not initialized
+          initModule()
+      } else {
+          // Module already loaded
+          setIsWasmReady(true)
+          setOutput(prev => [...prev, '> OmniNative Virtual Machine: READY.'])
+      }
 
       return () => {
           // Keep module in memory for potential re-use
-          // Don't remove the script as the module needs to persist
       }
   }, [])
 
@@ -103,10 +126,11 @@ export default function OnlineCompilerPage() {
     setOutput(prev => [...prev, '', `> Compiling & Executing (OmniNative VM)...`])
 
     try {
-        if ((activeLang === 'c' || activeLang === 'cpp') && isWasmReady && (window as any).Module && (window as any).Module.ccall) {
-             // Real WASM Compiler
+        const module = (window as any).OmniNativeModule
+        if ((activeLang === 'c' || activeLang === 'cpp') && isWasmReady && module && module.ccall) {
+             // Real WASM Compiler - use ccall for proper string marshaling
              setOutput(prev => [...prev, '> [WASM] Executing C++ core...'])
-             const result = (window as any).Module.ccall(
+             const result = module.ccall(
                 'compile_and_run',
                 'string',
                 ['string'],

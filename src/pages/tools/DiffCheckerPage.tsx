@@ -18,19 +18,40 @@ export default function DiffCheckerPage() {
 
     useEffect(() => {
         // Load WASM Module
-        if (!document.getElementById('wasm-diff-checker')) {
+        const scriptId = 'wasm-diff-checker'
+        if (!document.getElementById(scriptId)) {
             const script = document.createElement('script')
-            script.id = 'wasm-diff-checker'
+            script.id = scriptId
             script.src = '/wasm/diff_checker.js'
             script.async = true
-            script.onload = () => {
-                console.log('Diff Checker WASM script loaded')
-                // Wait for Module to be ready if needed, or assume it's global
-                setIsWasmLoaded(true)
+            script.onload = async () => {
+                console.log('[WASM] Diff Checker script loaded, initializing module...')
+                try {
+                    const DiffChecker = (window as any).DiffChecker
+                    if (typeof DiffChecker === 'function') {
+                        const module = await DiffChecker()
+                        ;(window as any).DiffCheckerModule = module
+                        console.log('[WASM] Diff Checker module ready')
+                        setIsWasmLoaded(true)
+                    } else {
+                        throw new Error('DiffChecker not found on window')
+                    }
+                } catch (err) {
+                    console.error('[WASM] Failed to initialize DiffChecker:', err)
+                    // Still set true to use fallback
+                    setIsWasmLoaded(true)
+                }
+            }
+            script.onerror = () => {
+                console.error('[WASM] Failed to load Diff Checker script')
+                setIsWasmLoaded(true) // Use fallback
             }
             document.body.appendChild(script)
         } else {
-            setIsWasmLoaded(true)
+            // Script already exists, check if module is loaded
+            if ((window as any).DiffCheckerModule) {
+                setIsWasmLoaded(true)
+            }
         }
     }, [])
 
@@ -45,16 +66,28 @@ export default function DiffCheckerPage() {
             try {
                 let calculatedDiffs = null;
                 // Try WASM first
-                if (isWasmLoaded && (window as any).Module && (window as any).Module.ccall) {
+                const module = (window as any).DiffCheckerModule
+                if (isWasmLoaded && module && module._compute_diff) {
                     try {
-                        (window as any).Module.ccall(
-                            'compute_diff',
-                            'string',
-                            ['string', 'string'],
-                            [leftText, rightText]
-                        )
-                        // Note: Our TS fallback is very stable for UI display
-                        calculatedDiffs = computeDiff(leftText, rightText);
+                        // Get result pointer and convert to string
+                        const resultPtr = module._compute_diff(leftText, rightText)
+                        const wasmResult = module.UTF8ToString ? module.UTF8ToString(resultPtr) : resultPtr
+
+                        // Parse WASM output format: "  line", "+ line", "- line"
+                        if (wasmResult && typeof wasmResult === 'string') {
+                            calculatedDiffs = wasmResult.split('\n')
+                                .filter(line => line.length > 0)
+                                .map(line => {
+                                    const prefix = line.substring(0, 2)
+                                    const value = line.substring(2)
+                                    if (prefix === '+ ') return { type: 'ins' as const, value }
+                                    if (prefix === '- ') return { type: 'del' as const, value }
+                                    return { type: 'eq' as const, value: line.substring(2) || line }
+                                })
+                            console.log('[WASM] Diff computed successfully')
+                        } else {
+                            throw new Error('WASM returned invalid result')
+                        }
                     } catch (e) {
                         console.error('WASM Diff Error:', e);
                         calculatedDiffs = computeDiff(leftText, rightText);
