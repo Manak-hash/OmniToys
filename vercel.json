@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/omniflow",
-      "destination": "https://omniflow-two.vercel.app"
+      "destination": "/omniflow/index.html"
     },
     {
       "source": "/omniflow/:match*",
-      "destination": "https://omniflow-two.vercel.app/:match*"
+      "destination": "/omniflow/:match*"
     }
   ],
   "headers": [
@@ -39,26 +39,6 @@
           "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
-    },
-    {
-      "source": "/tools/omniflow",
-      "headers": [
-        {
-          "key": "X-Frame-Options",
-          "value": "ALLOW-FROM https://omnitoys.vercel.app"
-        },
-        {
-          "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self' https://omnitoys.vercel.app"
-        }
-      ]
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/tools/omniflow",
-      "destination": "/omniflow",
-      "permanent": true
     }
   ]
 }

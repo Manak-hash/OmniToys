@@ -30,7 +30,7 @@ export function AppSwitcher({
       const omniFlowPort = currentPort % 2 === 1 ? currentPort + 1 : currentPort + 2
       omniFlowUrl = `http://localhost:${omniFlowPort}`
     } else {
-      omniFlowUrl = 'https://omniflow.vercel.app'
+      omniFlowUrl = '/omniflow' // Same domain subdirectory
     }
 
     triggerTransition(omniFlowUrl)

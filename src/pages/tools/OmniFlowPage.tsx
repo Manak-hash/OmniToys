@@ -16,11 +16,11 @@ export default function OmniFlowPage() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [iframeLoaded, setIframeLoaded] = useState(false)
 
-  // OmniFlow deployment URL - uses same origin for development, deployed URL for production
+  // OmniFlow deployment URL - uses same origin for development, subdirectory for production
   const isDev = import.meta.env.DEV
   const omniFlowUrl = isDev
     ? 'http://localhost:5176' // Local development
-    : 'https://omniflow.vercel.app' // Production deployment
+    : '/omniflow' // Same domain subdirectory
 
   const handleOpenInNewTab = () => {
     window.open(omniFlowUrl, '_blank', 'noopener,noreferrer')
