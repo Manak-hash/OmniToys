@@ -1,10 +1,17 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { AppLayout } from './components/layout/AppLayout'
 import HomePage from './pages/HomePage'
 import ToolsCatalog from './pages/ToolsCatalog'
 import ComingSoonPage from './pages/ComingSoonPage'
 import SettingsPage from './pages/SettingsPage'
+import { trackWebVitals } from './utils/performance'
+import { PWAProvider } from './contexts/PWAContext'
+import { TransitionProvider } from './contexts/TransitionContext'
+import { usePreferences } from './store/preferences'
+import { getThemeById, applyTheme } from './utils/themes'
+import { Transition } from './components/transitions'
+import { TransitionErrorBoundary } from './components/transitions/TransitionErrorBoundary'
 
 // Lazy load tool pages
 const JsonToTsPage = lazy(() => import('./pages/tools/JsonToTsPage'))
@@ -91,6 +98,9 @@ const NeuralPromptPage = lazy(() => import('./pages/tools/NeuralPromptPage'))
 const ApiMockPage = lazy(() => import('./pages/tools/ApiMockPage'))
 const GitCheatPage = lazy(() => import('./pages/tools/GitCheatPage'))
 const BackgroundRemoverPage = lazy(() => import('./pages/tools/BackgroundRemoverPage'))
+
+// OmniFlow Integration
+const OmniFlowPage = lazy(() => import('./pages/tools/OmniFlowPage'))
 
 // Loading fallback component
 function LoadingFallback() {
@@ -682,6 +692,15 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      // OmniFlow Integration - Special Tool
+      {
+        path: 'tools/omniflow',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <OmniFlowPage />
+          </Suspense>
+        ),
+      },
       {
         path: 'tools/*',
         element: <ComingSoonPage />, // Catch-all for tools not implemented yet
@@ -699,7 +718,56 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} />
+  const { theme: themeId } = usePreferences()
+  const [transitionTarget, setTransitionTarget] = useState<string | null>(null)
+
+  // Apply theme on mount and when changed
+  useEffect(() => {
+    const theme = getThemeById(themeId)
+    applyTheme(theme)
+  }, [themeId])
+
+  // Track Web Vitals in development mode
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      trackWebVitals()
+    }
+  }, [])
+
+  // Handle transition trigger from OmniSwitcher
+  const handleTransitionTrigger = (targetUrl: string) => {
+    setTransitionTarget(targetUrl)
+  }
+
+  const handleTransitionComplete = () => {
+    setTransitionTarget(null)
+  }
+
+  const handleTransitionError = (error: Error) => {
+    console.error('[App] Transition error:', error)
+    setTransitionTarget(null)
+  }
+
+  return (
+    <PWAProvider>
+      <TransitionProvider onTransitionTrigger={handleTransitionTrigger}>
+        <RouterProvider router={router} />
+
+        {/* Transition overlay with error boundary */}
+        {transitionTarget && (
+          <TransitionErrorBoundary
+            targetUrl={transitionTarget}
+            onError={handleTransitionError}
+          >
+            <Transition
+              targetUrl={transitionTarget}
+              onComplete={handleTransitionComplete}
+            />
+          </TransitionErrorBoundary>
+        )}
+      </TransitionProvider>
+    </PWAProvider>
+  )
 }
 
 export default App

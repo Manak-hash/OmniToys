@@ -125,7 +125,14 @@ export default function BackgroundRemoverPage() {
                 ))}
               </div>
               {selectedModel && (
-                <p className="text-xs text-omni-text/40">{selectedModel.description}</p>
+                <div className="space-y-1">
+                  <p className="text-xs text-omni-text/40">{selectedModel.description}</p>
+                  {selectedModel.size > 100 * 1024 * 1024 && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      ⚠️ Large model - requires 4GB+ RAM. May fail on mobile/low-memory devices.
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 

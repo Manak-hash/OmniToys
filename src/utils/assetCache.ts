@@ -227,10 +227,8 @@ export async function cacheAsset(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`[AssetCache] Downloading ${name} (attempt ${attempt}/${maxRetries})`)
 
       const blob = await downloadWithProgress(url, (progress) => {
-        console.log(`[AssetCache] ${name}: ${progress.progress}% (${progress.loaded}/${progress.total})`)
         onProgress?.(progress)
       })
 
@@ -245,7 +243,6 @@ export async function cacheAsset(
       }
 
       await cacheDB.set(asset)
-      console.log(`[AssetCache] Cached ${name} (${formatBytes(blob.size)})`)
 
       return blob
     } catch (error) {
@@ -254,7 +251,6 @@ export async function cacheAsset(
 
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000 // Exponential backoff
-        console.log(`[AssetCache] Retrying in ${delay}ms...`)
         await new Promise((resolve) => setTimeout(resolve, delay))
       }
     }
@@ -270,10 +266,8 @@ export async function getCachedAsset(name: string, version: string): Promise<Blo
   try {
     const asset = await cacheDB.get(name, version)
     if (asset) {
-      console.log(`[AssetCache] Cache hit: ${name}`)
       return asset.blob
     }
-    console.log(`[AssetCache] Cache miss: ${name}`)
     return null
   } catch (error) {
     console.error('[AssetCache] Error getting cached asset:', error)
@@ -287,7 +281,6 @@ export async function getCachedAsset(name: string, version: string): Promise<Blo
 export async function deleteCachedAsset(name: string): Promise<void> {
   try {
     await cacheDB.delete(name)
-    console.log(`[AssetCache] Deleted: ${name}`)
   } catch (error) {
     console.error('[AssetCache] Error deleting asset:', error)
   }
@@ -299,7 +292,6 @@ export async function deleteCachedAsset(name: string): Promise<void> {
 export async function clearAllAssets(): Promise<void> {
   try {
     await cacheDB.clear()
-    console.log('[AssetCache] Cleared all assets')
   } catch (error) {
     console.error('[AssetCache] Error clearing assets:', error)
   }

@@ -127,7 +127,6 @@ export async function initQRGenerator(): Promise<void> {
       // Check if module script is already loaded
       if (!(window as any).QRGenerator) {
         // Load WASM module script
-        console.log('[QR WASM] Loading module script...')
 
         // Create script element
         const script = document.createElement('script')
@@ -138,7 +137,6 @@ export async function initQRGenerator(): Promise<void> {
         // Wait for script to load
         await new Promise<void>((resolve, reject) => {
           script.onload = () => {
-            console.log('[QR WASM] Script onload fired')
             resolve()
           }
           script.onerror = (e) => {
@@ -148,22 +146,17 @@ export async function initQRGenerator(): Promise<void> {
           document.body.appendChild(script)
         })
 
-        console.log('[QR WASM] Script loaded, QRGenerator exists:', typeof (window as any).QRGenerator)
-      } else {
-        console.log('[QR WASM] Script already loaded')
+        // Module already loaded
       }
 
       // Call the modularized function and wait for it to resolve
-      console.log('[QR WASM] Initializing module...')
       const QRGeneratorFunc = (window as any).QRGenerator
 
-      console.log('[QR WASM] QRGenerator type:', typeof QRGeneratorFunc)
       if (typeof QRGeneratorFunc !== 'function') {
         throw new Error('QRGenerator is not a function')
       }
 
       // The modularized module returns a Promise that resolves to the Module
-      console.log('[QR WASM] Calling QRGenerator()...')
 
       // Add error handling for WASM loading
       QRModule = await QRGeneratorFunc().catch((err) => {
@@ -171,18 +164,16 @@ export async function initQRGenerator(): Promise<void> {
         throw err
       })
 
-      console.log('[QR WASM] Module received, type:', typeof QRModule)
-      console.log('[QR WASM] Module keys (sample):', Object.keys(QRModule || {}).slice(0, 15))
 
       // Verify the module has the expected functions
       const expectedFuncs = ['_generate_qr', '_generate_micro_qr', '_generate_aztec', '_generate_data_matrix', '_get_version', '_free_memory', 'UTF8ToString']
       for (const func of expectedFuncs) {
-        console.log(`[QR WASM] Function ${func} exists:`, typeof QRModule?.[func])
+        if (!(func in QRModule)) {
+          console.warn(`[QR WASM] Expected function ${func} not found in module`)
+        }
       }
 
       isInitialized = true
-      console.log('[QR WASM] Module initialized successfully')
-      console.log('[QR WASM] Version:', getVersion())
     } catch (error) {
       console.error('[QR WASM] Failed to initialize:', error)
       throw error
@@ -197,12 +188,9 @@ export async function initQRGenerator(): Promise<void> {
  */
 export function getVersion(): string {
   if (!isInitialized || !QRModule) {
-    console.log('[QR WASM] getVersion: Not initialized', { isInitialized, hasModule: !!QRModule })
     return 'Not initialized'
   }
   try {
-    console.log('[QR WASM] getVersion: Module keys:', Object.keys(QRModule).filter(k => !k.startsWith('_')).slice(0, 20))
-    console.log('[QR WASM] getVersion: Calling get_version via ccall...')
 
     // Use ccall for proper string marshaling
     const version = QRModule.ccall(
@@ -211,7 +199,6 @@ export function getVersion(): string {
       [],
       []
     )
-    console.log('[QR WASM] getVersion: Version string =', version)
 
     return version
   } catch (e) {
@@ -253,7 +240,6 @@ export async function generateQR(
     format = OutputFormat.SVG,
   } = options
 
-  console.log('[QR WASM] generateQR called with:', { text, variant, size, margin, ecc, format })
 
   try {
     let result: string
@@ -266,7 +252,6 @@ export async function generateQR(
     // Use ccall for proper string marshaling
     switch (variant) {
       case QRVariant.MICRO:
-        console.log('[QR WASM] Calling generate_micro_qr via ccall')
         result = QRModule.ccall(
           'generate_micro_qr',
           'string',
@@ -276,7 +261,6 @@ export async function generateQR(
         break
 
       case QRVariant.AZTEC:
-        console.log('[QR WASM] Calling generate_aztec via ccall')
         result = QRModule.ccall(
           'generate_aztec',
           'string',
@@ -286,7 +270,6 @@ export async function generateQR(
         break
 
       case QRVariant.DATA_MATRIX:
-        console.log('[QR WASM] Calling generate_data_matrix via ccall')
         result = QRModule.ccall(
           'generate_data_matrix',
           'string',
@@ -297,7 +280,6 @@ export async function generateQR(
 
       case QRVariant.STANDARD:
       default:
-        console.log('[QR WASM] Calling generate_qr via ccall')
         result = QRModule.ccall(
           'generate_qr',
           'string',
@@ -307,7 +289,6 @@ export async function generateQR(
         break
     }
 
-    console.log('[QR WASM] Result string length:', result.length, 'first 100 chars:', result.substring(0, 100))
 
     // Check for errors
     if (result.startsWith('Error:')) {

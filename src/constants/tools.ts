@@ -24,6 +24,8 @@ export interface Tool {
 const createIcon = (Icon: React.ComponentType<{ className?: string }>) => React.createElement(Icon, { className: "w-5 h-5" })
 
 export const ALL_TOOLS: Tool[] = [
+  // OmniFlow - Special Integration Tool
+  { id: 'omniflow', to: '/tools/omniflow', title: 'OmniFlow', description: 'Visual mind mapping & task management with real-time collaboration', icon: createIcon(GitBranch), category: 'Dev', isWasm: false, isNew: true, isFavorite: true },
   // Web Design & UI
   { id: 'palette', to: '/tools/palette', title: 'Color Palette Extractor', description: 'Generate HEX/RGB/HSL from images', icon: createIcon(Palette), category: 'Design', isNew: true },
   { id: 'glassmorphism', to: '/tools/glassmorphism', title: 'Glassmorphism Editor', description: 'Create frosted-glass CSS effects', icon: createIcon(Sparkles), category: 'Design', isNew: true },

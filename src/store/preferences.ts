@@ -2,7 +2,9 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface PreferencesState {
-  theme: 'dark' | 'light'
+  theme: string // Theme ID
+  themeIntensity: number // 0-100, default = 100
+  accessibilityMode: 'normal' | 'high-contrast'
   favorites: string[]
   recentTools: string[]
   lowDataMode: boolean
@@ -12,15 +14,22 @@ interface PreferencesState {
   clearFavorites: () => void
   addRecentTool: (toolId: string) => void
   clearRecentTools: () => void
-  toggleTheme: () => void
+  setTheme: (themeId: string) => void
+  setThemeIntensity: (intensity: number) => void
+  setAccessibilityMode: (mode: 'normal' | 'high-contrast') => void
   setLowDataMode: (enabled: boolean) => void
   setVibrationEnabled: (enabled: boolean) => void
 }
 
+// Constants for limits
+const MAX_RECENT_TOOLS = 10
+
 export const usePreferences = create<PreferencesState>()(
   persist(
     (set) => ({
-      theme: 'dark',
+      theme: 'cyberpunk-red', // Default theme
+      themeIntensity: 100, // Default full intensity
+      accessibilityMode: 'normal' as const,
       favorites: [],
       recentTools: [],
       lowDataMode: false,
@@ -32,14 +41,15 @@ export const usePreferences = create<PreferencesState>()(
       clearFavorites: () => set({ favorites: [] }),
       addRecentTool: (toolId) =>
         set((state) => {
-          // Remove if already exists, add to front, keep only 5
+          // Remove if already exists, add to front, keep only MAX_RECENT_TOOLS
           const filtered = state.recentTools.filter((id) => id !== toolId)
-          const newRecent = [toolId, ...filtered].slice(0, 5)
+          const newRecent = [toolId, ...filtered].slice(0, MAX_RECENT_TOOLS)
           return { recentTools: newRecent }
         }),
       clearRecentTools: () => set({ recentTools: [] }),
-      toggleTheme: () =>
-        set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
+      setTheme: (themeId) => set({ theme: themeId }),
+      setThemeIntensity: (themeIntensity) => set({ themeIntensity }),
+      setAccessibilityMode: (accessibilityMode) => set({ accessibilityMode }),
       setLowDataMode: (lowDataMode) => set({ lowDataMode }),
       setVibrationEnabled: (vibrationEnabled) => set({ vibrationEnabled }),
     }),

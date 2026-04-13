@@ -77,7 +77,6 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
         setStatus('uncached')
         setCachedSize(null)
       } catch (err) {
-        console.error('[useAssetCache] Error checking cache:', err)
         setStatus('error')
         setError(err instanceof Error ? err.message : 'Failed to check cache')
       }
@@ -88,12 +87,10 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
 
   const download = useCallback(async () => {
     if (status === 'cached') {
-      console.log(`[useAssetCache] ${assetName} already cached`)
       return
     }
 
     if (status === 'downloading') {
-      console.log(`[useAssetCache] ${assetName} already downloading`)
       return
     }
 
@@ -111,7 +108,6 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
       setCachedSize(formatBytes(blob.size))
       setProgress(100)
     } catch (err) {
-      console.error('[useAssetCache] Download failed:', err)
       setStatus('error')
       setError(err instanceof Error ? err.message : 'Download failed')
       setProgress(0)
@@ -135,9 +131,7 @@ export function useAssetCache(config: AssetCacheConfig): UseAssetCacheReturn {
       setCachedSize(null)
       setProgress(0)
       setError(null)
-      console.log(`[useAssetCache] Cleared ${assetName}`)
     } catch (err) {
-      console.error('[useAssetCache] Clear failed:', err)
       setError(err instanceof Error ? err.message : 'Failed to clear cache')
     }
   }, [assetName])

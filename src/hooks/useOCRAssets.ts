@@ -63,12 +63,10 @@ export function useOCRAssets(_defaultLanguage: OcrLanguage = 'eng'): OcrAssetsSt
 
   const loadLanguage = useCallback(async (lang: OcrLanguage) => {
     if (state.loadedLanguages.has(lang)) {
-      console.log(`[useOCRAssets] Language ${lang} already loaded`)
       return
     }
 
     if (loadingRef.current.has(lang)) {
-      console.log(`[useOCRAssets] Language ${lang} already loading`)
       return
     }
 
@@ -76,7 +74,6 @@ export function useOCRAssets(_defaultLanguage: OcrLanguage = 'eng'): OcrAssetsSt
     setState((prev) => ({ ...prev, isLoading: true, progress: 0, status: `Loading ${OCR_LANGUAGES[lang].name} language data...` }))
 
     try {
-      console.log(`[useOCRAssets] Loading language: ${lang}`)
 
       // Create worker with progress tracking
       const worker = await createWorker(lang, 1, {
@@ -123,7 +120,6 @@ export function useOCRAssets(_defaultLanguage: OcrLanguage = 'eng'): OcrAssetsSt
         status: `${OCR_LANGUAGES[lang].name} loaded successfully`,
       }))
 
-      console.log(`[useOCRAssets] Language ${lang} loaded successfully`)
     } catch (error) {
       console.error(`[useOCRAssets] Failed to load language ${lang}:`, error)
       setState((prev) => ({
@@ -168,7 +164,6 @@ export function useOCRAssets(_defaultLanguage: OcrLanguage = 'eng'): OcrAssetsSt
         error: null,
       })
 
-      console.log('[useOCRAssets] Cache cleared')
     } catch (error) {
       console.error('[useOCRAssets] Failed to clear cache:', error)
       setState((prev) => ({

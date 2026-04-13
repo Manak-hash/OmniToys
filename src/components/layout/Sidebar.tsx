@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import logo from '@/assets/icons/OmniToys(WebIcon).png'
 import { usePreferences } from '@/store/preferences'
 import { ALL_TOOLS } from '@/constants/tools'
+import { AppSwitcher } from '@/components/navigation/AppSwitcher'
 
 const primaryNav = [
   { to: '/', icon: <Home className="w-5 h-5" />, label: 'Lab Home' },
@@ -158,6 +159,10 @@ export function Sidebar() {
             {/* System Controls */}
             <nav className="space-y-1.5">
               <p className="text-[10px] text-omni-text/10 font-black uppercase tracking-widest ml-4 mb-4 font-mono">/ SYS_CORE</p>
+
+              {/* App Switcher */}
+              <AppSwitcher variant="sidebar" />
+
               <NavLink
                 to="/settings"
                 onClick={() => setIsOpen(false)}

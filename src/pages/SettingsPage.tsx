@@ -1,155 +1,345 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ToolLayout } from '@/components/tools/ToolLayout'
-import { 
-  Shield, Bell, Database, 
-  Monitor, Palette, Info, ExternalLink, Github, Settings 
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection'
+import { ThemeSelector } from '@/components/ui/ThemeSelector'
+import { IntensitySlider } from '@/components/ui/IntensitySlider'
+import { TransitionSettings } from '@/components/settings/TransitionSettings'
+import {
+  Shield, Bell, Database, Monitor, Info, ExternalLink, Github,
+  Download, Rocket, Trash2, Zap, Globe, Smartphone,
+  Wrench, Palette, Timer
 } from 'lucide-react'
 import { usePreferences } from '@/store/preferences'
+import { usePWA } from '@/contexts/PWAContext'
 import { motion } from 'framer-motion'
 
-function Section({ title, children }: { title: string, children: React.ReactNode }) {
+// Feature components
+function Section({ title, icon: Icon, children }: {
+  title: string
+  icon?: React.ElementType
+  children: React.ReactNode
+}) {
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-black uppercase tracking-widest text-omni-text/20 ml-1">{title}</h3>
-      <div className="glass-card rounded-[32px] overflow-hidden">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 px-1">
+        {Icon && <Icon className="w-4 h-4 text-omni-primary" />}
+        <h3 className="text-xs font-black uppercase tracking-widest text-omni-text/30">{title}</h3>
+      </div>
+      <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden">
         {children}
       </div>
     </div>
   )
 }
 
-function SettingRow({ icon: Icon, title, description, children }: { 
-  icon: React.ElementType, 
-  title: string, 
-  description?: string,
-  children: React.ReactNode 
+function SettingRow({
+  icon: Icon,
+  title,
+  description,
+  action,
+  badge
+}: {
+  icon: React.ElementType
+  title: string
+  description?: string
+  action: React.ReactNode
+  badge?: string
 }) {
   return (
-    <div className="flex items-center justify-between p-4 gap-4">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-2xl bg-omni-text/5 flex items-center justify-center text-omni-text/40">
-          <Icon className="w-5 h-5" />
+    <div className="flex items-center justify-between p-4 gap-4 hover:bg-white/[0.02] transition-colors">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="w-9 h-9 rounded-lg bg-white/[0.03] border border-white/[0.05] flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-omni-text/40" />
         </div>
-        <div>
-          <h4 className="font-bold text-omni-text">{title}</h4>
-          {description && <p className="text-xs text-omni-text/40">{description}</p>}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h4 className="text-sm font-semibold text-omni-text">{title}</h4>
+            {badge && (
+              <span className="px-1.5 py-0.5 bg-omni-primary/10 text-omni-primary rounded text-[9px] font-bold uppercase tracking-wider flex-shrink-0">
+                {badge}
+              </span>
+            )}
+          </div>
+          {description && (
+            <p className="text-xs text-omni-text/40 mt-0.5 leading-relaxed">{description}</p>
+          )}
         </div>
       </div>
-      {children}
+      {action}
     </div>
   )
 }
 
-function Toggle({ checked, onChange }: { checked: boolean, onChange: (v: boolean) => void }) {
+function Toggle({ checked, onChange, label }: {
+  checked: boolean
+  onChange: (v: boolean) => void
+  label?: string
+}) {
   return (
-    <button 
+    <button
       onClick={() => onChange(!checked)}
-      className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-omni-primary' : 'bg-omni-text/20'}`}
+      className={`relative w-11 h-6 rounded-full transition-all duration-200 ${checked ? 'bg-omni-primary shadow-lg shadow-omni-primary/20' : 'bg-white/10'}`}
+      aria-label={label}
     >
-      <motion.div 
+      <motion.div
         className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow"
-        animate={{ x: checked ? 24 : 0 }}
+        animate={{ x: checked ? 20 : 0 }}
         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
       />
     </button>
   )
 }
 
+function InfoRow({ icon: Icon, label, value, link }: {
+  icon: React.ElementType
+  label: string
+  value: string
+  link?: string
+}) {
+  const content = (
+    <>
+      <div className="flex items-center gap-2 text-omni-text/40">
+        <Icon className="w-4 h-4" />
+        <span className="text-xs">{label}</span>
+      </div>
+      {link ? (
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs font-mono text-omni-primary hover:underline flex items-center gap-1"
+        >
+          {value}
+          <ExternalLink className="w-3 h-3" />
+        </a>
+      ) : (
+        <span className="text-xs font-mono text-omni-text/60">{value}</span>
+      )}
+    </>
+  )
+
+  return (
+    <div className="flex items-center justify-between p-4">
+      {content}
+    </div>
+  )
+}
+
 export default function SettingsPage() {
-  const { 
-    clearFavorites, 
-    lowDataMode, setLowDataMode,
-    vibrationEnabled, setVibrationEnabled 
+  const {
+    clearFavorites,
+    clearRecentTools,
+    favorites,
+    recentTools,
+    lowDataMode,
+    setLowDataMode,
+    vibrationEnabled,
+    setVibrationEnabled
   } = usePreferences()
+
+  const { isInstalled, canInstall, installPWA } = usePWA()
+
+  const [cacheSize, setCacheSize] = useState('Calculating...')
   const [notifications, setNotifications] = useState(true)
+
+  // Calculate cache size
+  useEffect(() => {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      navigator.storage.estimate().then(({ usage }) => {
+        const mb = (usage / (1024 * 1024)).toFixed(1)
+        setCacheSize(`${mb} MB`)
+      })
+    }
+  }, [])
+
+  const handleFlushData = () => {
+    if (confirm('Clear all favorites and recent tools? This cannot be undone.')) {
+      clearFavorites()
+      clearRecentTools()
+    }
+  }
+
+  const stats = [
+    { label: 'Favorites', value: favorites.length },
+    { label: 'Recent', value: recentTools.length },
+    { label: 'Cache', value: cacheSize },
+  ]
+
+  const handleInstall = async () => {
+    await installPWA()
+  }
 
   return (
     <ToolLayout
       title="System Configuration"
-      description="Fine-tune your lab environment and data persistence settings."
-      icon={<Settings className="w-8 h-8" />}
+      description="Fine-tune your laboratory environment and data persistence settings."
+      icon={<Wrench className="w-8 h-8" />}
+      hideActions={true}
     >
-      <div className="max-w-3xl mx-auto space-y-10 pb-20">
-        <Section title="Interface & Experience">
-          <SettingRow 
-            icon={Palette} 
-            title="Appearance" 
-            description="System theme is automatically synced with your OS."
-          >
-            <span className="text-[10px] font-black uppercase tracking-widest text-omni-text/20 bg-omni-text/5 px-3 py-1 rounded-full">AUTO_SYNC</span>
-          </SettingRow>
-          
-          <div className="h-px bg-omni-text/5 mx-4" />
-          
-          <SettingRow 
-            icon={Monitor} 
-            title="Low Data Mode" 
-            description="Disable non-critical animations and heavy effects."
-          >
-            <Toggle checked={lowDataMode} onChange={setLowDataMode} />
-          </SettingRow>
-
-          <div className="h-px bg-omni-text/5 mx-4" />
-
-          <SettingRow 
-            icon={Shield} 
-            title="Haptic Feedback" 
-            description="Subtle vibrations for critical system interactions."
-          >
-            <Toggle checked={vibrationEnabled} onChange={setVibrationEnabled} />
-          </SettingRow>
-        </Section>
-
-        <Section title="Laboratory Communications">
-          <SettingRow 
-            icon={Bell} 
-            title="Process Notifications" 
-            description="Get alerted when long-running Wasm tasks complete."
-          >
-            <Toggle checked={notifications} onChange={setNotifications} />
-          </SettingRow>
-        </Section>
-
-        <Section title="Storage & Persistence">
-          <SettingRow 
-            icon={Database} 
-            title="Local Cache" 
-            description="Clear all favorites and tool history from this browser."
-          >
-            <button 
-              onClick={clearFavorites}
-              className="px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl text-xs font-black uppercase tracking-widest transition-colors"
+      <div className="max-w-3xl mx-auto space-y-8 pb-20">
+        {/* Quick Stats */}
+        <div className="grid grid-cols-3 gap-3">
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4 text-center"
             >
-              Flush Data
-            </button>
-          </SettingRow>
+              <div className="text-2xl font-bold text-omni-text font-mono">{stat.value}</div>
+              <div className="text-[10px] text-omni-text/30 uppercase tracking-wider mt-1">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* PWA Status */}
+        <Section title="App Installation" icon={Download}>
+          <SettingRow
+            icon={Smartphone}
+            title="Installation Status"
+            description={isInstalled ? "App is installed and running standalone" : "Running in browser"}
+            badge={isInstalled ? "INSTALLED" : "WEB"}
+            action={
+              isInstalled ? (
+                <span className="text-xs text-green-400 font-medium flex items-center gap-1">
+                  <Shield className="w-3.5 h-3.5" />
+                  Active
+                </span>
+              ) : canInstall ? (
+                <button
+                  onClick={handleInstall}
+                  className="group flex items-center gap-2 px-4 py-2 bg-omni-primary hover:bg-omni-primary-hover text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 hover:shadow-lg hover:shadow-omni-primary/30"
+                >
+                  <Download className="w-3.5 h-3.5 group-hover:animate-bounce" />
+                  Install
+                </button>
+              ) : (
+                <span className="text-xs text-omni-text/30 font-medium">Not Available</span>
+              )
+            }
+          />
         </Section>
 
-        <Section title="Protocol Info">
-          <div className="p-6 space-y-4">
-             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                   <Info className="w-5 h-5 text-omni-text/20" />
-                   <span className="text-sm font-bold text-omni-text">Project Version</span>
-                </div>
-                <span className="font-mono text-xs text-omni-text/40">v0.5.0 (BETA_LAB)</span>
-             </div>
-             <div className="h-px bg-omni-text/5" />
-             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                   <Github className="w-5 h-5 text-omni-text/20" />
-                   <span className="text-sm font-bold text-omni-text">Source Repository</span>
-                </div>
-                <a href="https://github.com/Manak-hash/OmniToys" target="_blank" rel="noreferrer" className="text-omni-primary hover:underline text-xs flex items-center gap-1 font-bold">
-                   GitHub <ExternalLink className="w-3 h-3" />
-                </a>
-             </div>
+        {/* Appearance - Collapsible Premium Theme System */}
+        <CollapsibleSection
+          title="Appearance & Themes"
+          icon={Palette}
+          defaultOpen={true}
+        >
+          <IntensitySlider />
+
+          <div className="h-px bg-white/[0.05] my-4" />
+
+          <ThemeSelector />
+
+          <div className="h-px bg-white/[0.05] my-4" />
+
+          <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden">
+            <SettingRow
+              icon={Zap}
+              title="Low Data Mode"
+              description="Disable animations and heavy effects"
+              action={
+                <Toggle
+                  checked={lowDataMode}
+                  onChange={setLowDataMode}
+                  label="Low data mode"
+                />
+              }
+            />
+
+            <div className="h-px bg-white/[0.05] mx-4" />
+
+            <SettingRow
+              icon={Monitor}
+              title="Haptic Feedback"
+              description="Vibrations for interactions"
+              action={
+                <Toggle
+                  checked={vibrationEnabled}
+                  onChange={setVibrationEnabled}
+                  label="Haptic feedback"
+                />
+              }
+            />
           </div>
+        </CollapsibleSection>
+
+        {/* Transition Settings */}
+        <CollapsibleSection
+          title="OmniSwitcher Transition"
+          icon={Timer}
+          defaultOpen={false}
+        >
+          <TransitionSettings />
+        </CollapsibleSection>
+
+        {/* Notifications */}
+        <Section title="Notifications" icon={Bell}>
+          <SettingRow
+            icon={Bell}
+            title="Process Alerts"
+            description="Get notified when long-running tasks complete"
+            action={
+              <Toggle
+                checked={notifications}
+                onChange={setNotifications}
+                label="Process notifications"
+              />
+            }
+          />
         </Section>
 
-        <div className="text-center space-y-2 opacity-20">
-           <p className="text-[10px] font-black uppercase tracking-[0.3em] font-mono">OmniToys Lab Environment</p>
-           <p className="text-[8px] font-medium leading-relaxed max-w-xs mx-auto">All tools run locally via WASM or client-side JS. No tracking. No telemetry. Pure efficiency.</p>
+        {/* Storage */}
+        <Section title="Data & Storage" icon={Database}>
+          <SettingRow
+            icon={Database}
+            title="Local Storage"
+            description={`${favorites.length} favorites, ${recentTools.length} recent tools`}
+            action={
+              <button
+                onClick={handleFlushData}
+                className="group flex items-center gap-2 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 rounded-lg text-xs font-bold uppercase tracking-wider transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
+                Flush
+              </button>
+            }
+          />
+        </Section>
+
+        {/* App Info */}
+        <Section title="About" icon={Info}>
+          <InfoRow
+            icon={Rocket}
+            label="Version"
+            value="v0.5.0 (BETA_LAB)"
+          />
+          <InfoRow
+            icon={Github}
+            label="Source"
+            value="GitHub Repository"
+            link="https://github.com/Manak-hash/OmniToys"
+          />
+          <InfoRow
+            icon={Globe}
+            label="License"
+            value="MIT"
+          />
+        </Section>
+
+        {/* Footer */}
+        <div className="text-center space-y-3 pt-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.02] rounded-full border border-white/[0.05]">
+            <Shield className="w-3.5 h-3.5 text-green-400" />
+            <span className="text-[10px] text-omni-text/30 font-mono">
+              All tools run locally • No tracking • No telemetry
+            </span>
+          </div>
+          <p className="text-[9px] text-omni-text/20 leading-relaxed max-w-sm mx-auto">
+            OmniToys is a Progressive Web App designed for privacy-focused developers. All processing happens locally in your browser using WebAssembly or client-side JavaScript.
+          </p>
         </div>
       </div>
     </ToolLayout>

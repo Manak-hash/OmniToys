@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Share2, Star } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { usePreferences } from '@/store/preferences'
 import { toast } from 'sonner'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { ALL_TOOLS } from '@/constants/tools'
+import { ToolCard } from '@/components/tools/ToolCard'
 
 interface ToolLayoutProps {
   title: string
@@ -12,13 +14,32 @@ interface ToolLayoutProps {
   icon?: ReactNode
   children: ReactNode
   actions?: ReactNode
+  toolId?: string
+  hideActions?: boolean
 }
 
-export function ToolLayout({ title, description, icon, children, actions }: ToolLayoutProps) {
+export function ToolLayout({ title, description, icon, children, actions, toolId: propToolId, hideActions = false }: ToolLayoutProps) {
   const location = useLocation()
-  const toolId = location.pathname.split('/').pop() || ''
+  const navigate = useNavigate()
+  const toolId = propToolId || location.pathname.split('/').pop() || ''
   const { favorites, addFavorite, removeFavorite, addRecentTool } = usePreferences()
-  const isFavorite = favorites.includes(toolId)
+  const isFavorite = toolId ? favorites.includes(toolId) : false
+
+  // Calculate related tools
+  const relatedTools = useMemo(() => {
+    if (!toolId) return []
+
+    const currentTool = ALL_TOOLS.find(tool => tool.id === toolId)
+    if (!currentTool) return []
+
+    return ALL_TOOLS
+      .filter(tool =>
+        tool.category === currentTool.category &&
+        tool.id !== toolId &&
+        !tool.isComingSoon
+      )
+      .slice(0, 4)
+  }, [toolId])
 
   // Track recent tools
   useEffect(() => {
@@ -88,25 +109,29 @@ export function ToolLayout({ title, description, icon, children, actions }: Tool
         
         <div className="flex items-center gap-3 flex-wrap">
            {actions}
-           <div className="h-8 w-px bg-omni-text/5 mx-2 hidden sm:block" />
-           <button 
-             onClick={handleFavorite}
-             className={`p-3 rounded-2xl border transition-all duration-300 ${
-               isFavorite 
-                 ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20 shadow-[0_0_15px_rgba(250,204,21,0.2)]' 
-                 : 'text-omni-text/30 border-omni-text/5 hover:text-yellow-400 hover:bg-omni-text/5'
-             }`}
-             title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-           >
-             <Star className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-           </button>
-           <button 
-             onClick={handleShare}
-             className="p-3 rounded-2xl border border-omni-text/5 text-omni-text/30 hover:text-omni-primary hover:bg-omni-primary/5 hover:border-omni-primary/20 transition-all duration-300"
-             title="Share this tool"
-           >
-             <Share2 className="w-5 h-5" />
-           </button>
+           {!hideActions && toolId && (
+             <>
+               <div className="h-8 w-px bg-omni-text/5 mx-2 hidden sm:block" />
+               <button
+                 onClick={handleFavorite}
+                 className={`p-3 rounded-2xl border transition-all duration-300 ${
+                   isFavorite
+                     ? 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20 shadow-[0_0_15px_rgba(250,204,21,0.2)]'
+                     : 'text-omni-text/30 border-omni-text/5 hover:text-yellow-400 hover:bg-omni-text/5'
+                 }`}
+                 title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+               >
+                 <Star className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
+               </button>
+               <button
+                 onClick={handleShare}
+                 className="p-3 rounded-2xl border border-omni-text/5 text-omni-text/30 hover:text-omni-primary hover:bg-omni-primary/5 hover:border-omni-primary/20 transition-all duration-300"
+                 title="Share this tool"
+               >
+                 <Share2 className="w-5 h-5" />
+               </button>
+             </>
+           )}
         </div>
       </header>
 
@@ -116,6 +141,24 @@ export function ToolLayout({ title, description, icon, children, actions }: Tool
           {children}
         </div>
       </div>
+
+      {/* Related Tools Section */}
+      {relatedTools.length > 0 && (
+        <div className="mt-8 pt-8 border-t border-white/10">
+          <h3 className="text-lg font-semibold text-omni-text mb-4">
+            Related {ALL_TOOLS.find(tool => tool.id === toolId)?.category || ''} Tools
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {relatedTools.map(tool => (
+              <ToolCard
+                key={tool.id}
+                tool={tool}
+                onNavigate={(toolId) => navigate(`/tools/${toolId}`)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }

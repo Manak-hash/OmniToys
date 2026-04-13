@@ -21,6 +21,7 @@ import {
 
 // Import WASM interface
 import * as QRWasm from './qrGeneratorWasm'
+import { logger } from '@/utils/console'
 
 // Import JavaScript fallback
 import * as QRFallback from './qrGeneratorWasmFallback'
@@ -48,22 +49,22 @@ export async function initQRGenerator(): Promise<void> {
 
   initPromise = (async () => {
     try {
-      console.log('[QR] Detecting WASM availability...')
+      logger.wasm('[QR] Detecting WASM availability...')
 
       // Try to initialize WASM module
       await QRWasm.initQRGenerator()
 
       // WASM loaded successfully
       moduleType = 'wasm'
-      console.log('[QR] ✓ Using WASM module')
-      console.log('[QR] Version:', QRWasm.getVersion())
+      logger.wasm('[QR] ✓ Using WASM module')
+      logger.wasm('[QR] Version:', QRWasm.getVersion())
     } catch (error) {
       // WASM failed, use fallback
       console.warn('[QR] WASM not available, using fallback:', error)
       moduleType = 'fallback'
       await QRFallback.initQRGenerator()
-      console.log('[QR] ✓ Using JavaScript fallback')
-      console.log('[QR] Version:', QRFallback.getVersion())
+      logger.wasm('[QR] ✓ Using JavaScript fallback')
+      logger.wasm('[QR] Version:', QRFallback.getVersion())
     }
   })()
 
@@ -107,7 +108,7 @@ export async function generateQR(
   // Force fallback for non-standard variants (WASM implementation generates fake patterns)
   // Standard QR uses the qrcode npm library which works perfectly
   if (variant !== QRVariant.STANDARD && USE_WASM_FOR_VARIANTS === false) {
-    console.log('[QR] Using JavaScript fallback for', variant)
+    logger.wasm('[QR] Using JavaScript fallback for', variant)
     return await QRFallback.generateQR(text, variant, options)
   }
 

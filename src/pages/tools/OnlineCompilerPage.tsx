@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CodeEditor } from '@/components/ui/CodeEditor'
 import { cn } from '@/utils/cn'
 import { omniInterpreter } from '@/utils/interpreter/OmniInterpreter'
+import { logger } from '@/utils/console'
 
 const LANGUAGES = [
   { id: 'c', name: 'C', icon: Code2, enabled: true, color: '#03599C' },
@@ -79,13 +80,33 @@ export default function OnlineCompilerPage() {
 
       const initModule = async () => {
           try {
+              logger.wasm('[WASM] Starting initialization...')
               const OmniNative = (window as any).OmniNative
+
+              logger.wasm('[WASM] OmniNative function exists:', typeof OmniNative === 'function')
+
               if (typeof OmniNative === 'function') {
+                  logger.wasm('[WASM] Calling OmniNative() factory function...')
                   const module = await OmniNative()
                   ;(window as any).OmniNativeModule = module
-                  console.log('[WASM] OmniNative module ready, ccall:', typeof module.ccall)
-                  setIsWasmReady(true)
-                  setOutput(prev => [...prev, '> OmniNative Virtual Machine: READY.'])
+
+                  logger.wasm('[WASM] Module loaded:', {
+                      ccall: typeof module.ccall,
+                      _compile_and_run: typeof module._compile_and_run,
+                      compile_and_run: typeof module.compile_and_run,
+                      UTF8ToString: typeof module.UTF8ToString,
+                      allKeys: Object.keys(module).filter(k => k.includes('compile'))
+                  })
+
+                  // Test if ccall works
+                  if (typeof module.ccall === 'function') {
+                      logger.wasm('[WASM] ✓ Module.ccall is available and ready')
+                      setIsWasmReady(true)
+                      setOutput(prev => [...prev, '> OmniNative Virtual Machine: READY.'])
+                  } else {
+                      console.error('[WASM] ✗ Module.ccall is not a function')
+                      setOutput(prev => [...prev, '> [WARNING] WASM loaded but ccall not available.'])
+                  }
               } else {
                   throw new Error('OmniNative not found on window')
               }
@@ -97,21 +118,27 @@ export default function OnlineCompilerPage() {
 
       if (!script) {
           // Script not loaded yet
+          logger.wasm('[WASM] Loading script tag...')
           const newScript = document.createElement('script')
           newScript.id = scriptId
           newScript.src = '/wasm/omni_native.js'
           newScript.async = true
-          newScript.onload = () => initModule()
-          newScript.onerror = () => {
-              console.error('[WASM] Failed to load script')
+          newScript.onload = () => {
+              logger.wasm('[WASM] Script tag loaded, initializing module...')
+              initModule()
+          }
+          newScript.onerror = (e) => {
+              console.error('[WASM] Failed to load script:', e)
               setOutput(prev => [...prev, '> [WARNING] WASM script failed to load.'])
           }
           document.body.appendChild(newScript)
       } else if (!(window as any).OmniNativeModule) {
           // Script exists but module not initialized
+          logger.wasm('[WASM] Script tag exists, initializing module...')
           initModule()
       } else {
           // Module already loaded
+          logger.wasm('[WASM] Module already loaded')
           setIsWasmReady(true)
           setOutput(prev => [...prev, '> OmniNative Virtual Machine: READY.'])
       }
@@ -127,24 +154,43 @@ export default function OnlineCompilerPage() {
 
     try {
         const module = (window as any).OmniNativeModule
-        if ((activeLang === 'c' || activeLang === 'cpp') && isWasmReady && module && module.ccall) {
+
+        logger.wasm('[WASM] runCode called:', {
+            activeLang,
+            isWasmReady,
+            moduleExists: !!module,
+            ccallExists: module && typeof module.ccall,
+            codeLength: code.length
+        })
+
+        if ((activeLang === 'c' || activeLang === 'cpp') && isWasmReady && module && typeof module.ccall === 'function') {
              // Real WASM Compiler - use ccall for proper string marshaling
              setOutput(prev => [...prev, '> [WASM] Executing C++ core...'])
-             const result = module.ccall(
-                'compile_and_run',
-                'string',
-                ['string'],
-                [code]
-             )
-             setOutput(prev => [...prev, result, '', '> Process finished (Exit Code 0).'])
+             logger.wasm('[WASM] Calling ccall with compile_and_run...')
+
+             try {
+                 const result = module.ccall(
+                    'compile_and_run',
+                    'string',
+                    ['string'],
+                    [code]
+                 )
+                 logger.wasm('[WASM] Execution result:', result)
+                 setOutput(prev => [...prev, result, '', '> Process finished (Exit Code 0).'])
+             } catch (wasmError) {
+                 console.error('[WASM] Error during ccall:', wasmError)
+                 setOutput(prev => [...prev, `> WASM Execution Error: ${wasmError}`])
+             }
         } else {
              // Fallback - TypeScript interpreter
+             logger.wasm('[WASM] Using fallback interpreter')
              setOutput(prev => [...prev, '> [FALLBACK] Using embedded TypeScript interpreter...'])
              await new Promise(r => setTimeout(r, 400));
              const result = omniInterpreter.execute(code);
              setOutput(prev => [...prev, ...result, '', '> Process finished.']);
         }
     } catch (error) {
+       console.error('[WASM] Fatal error in runCode:', error)
        setOutput(prev => [...prev, `> Execution Error: ${error}`])
     } finally {
       setIsRunning(false)

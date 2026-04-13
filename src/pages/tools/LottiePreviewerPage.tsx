@@ -20,7 +20,6 @@ export default function LottiePreviewerPage() {
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js'
     script.async = true
     script.onload = () => {
-      console.log('[Lottie] Library loaded')
     }
     document.body.appendChild(script)
 

@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Rocket, Shield, Zap, Layout, ArrowRight, Github, Terminal } from 'lucide-react'
+import { Rocket, Shield, Zap, Layout, ArrowRight, Github, Terminal, Sparkles } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState, useEffect } from 'react'
+import { AppSwitcher } from '@/components/navigation/AppSwitcher'
 
 interface FloatingIconProps {
   icon: ReactNode
@@ -202,6 +203,36 @@ export default function HomePage() {
               <TechBrand name="Framer Motion" />
               <TechBrand name="Tailwind v4" />
            </div>
+        </div>
+      </section>
+
+      {/* Future Section */}
+      <section className="max-w-4xl mx-auto px-4 py-20">
+        <div className="p-12 rounded-[48px] glass-card text-center space-y-8 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-omni-primary/20 to-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
+
+          <div className="relative z-10 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-omni-primary/10 border border-omni-primary/20 rounded-full text-omni-primary text-xs font-black uppercase tracking-[0.2em]">
+              <Sparkles className="w-4 h-4" /> Coming Soon
+            </div>
+
+            <h2 className="text-4xl font-black text-omni-text font-mono tracking-tighter">
+              The Future of <span className="text-omni-primary">OmniToys</span>
+            </h2>
+
+            <p className="text-omni-text/60 max-w-2xl mx-auto leading-relaxed">
+              We're building OmniFlow - a powerful project management and task tracking system that seamlessly integrates with your existing OmniToys tools.
+            </p>
+
+            <div className="pt-4">
+              <AppSwitcher variant="card" showShortcutHint={true} />
+            </div>
+
+            <p className="text-xs text-omni-text/30 font-mono pt-4">
+              Press <span className="text-omni-primary">Cmd+Shift+O</span> to switch instantly
+            </p>
+          </div>
         </div>
       </section>
     </div>

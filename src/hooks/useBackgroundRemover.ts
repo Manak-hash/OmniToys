@@ -118,10 +118,10 @@ export function useBackgroundRemover(): BackgroundRemovalState & BackgroundRemov
 
         // Create preview
         const previewCanvas = document.createElement('canvas')
-        previewCanvas.width = image.width
-        previewCanvas.height = image.height
+        previewCanvas.width = originalImageRef.current.width
+        previewCanvas.height = originalImageRef.current.height
         const previewCtx = previewCanvas.getContext('2d')!
-        previewCtx.drawImage(image, 0, 0)
+        previewCtx.drawImage(originalImageRef.current, 0, 0)
         const originalDataUrl = previewCanvas.toDataURL('image/png')
 
         setState((prev) => ({
@@ -132,16 +132,36 @@ export function useBackgroundRemover(): BackgroundRemovalState & BackgroundRemov
 
         // Preprocess image
         setState((prev) => ({ ...prev, progress: 50 }))
-        const { tensor } = await preprocessImage(image, selectedModel.config.inputSize)
+        const preprocessResult = await preprocessImage(originalImageRef.current, selectedModel.config.inputSize)
+        const tensor = preprocessResult.tensor
 
         // Run inference
         setState((prev) => ({ ...prev, progress: 60 }))
-        const mask = await runInference(tensor, selectedModel.id)
+        let mask
+        try {
+          mask = await runInference(tensor, selectedModel.id)
+        } catch (inferenceError) {
+          // Provide better error message for memory allocation failures
+          if (inferenceError instanceof Error) {
+            const errorMsg = inferenceError.message
+            if (errorMsg.includes('bad_alloc') || errorMsg.includes('memory')) {
+              throw new Error(
+                `Browser ran out of memory. Try the smaller RMBG-1.4 model, close other browser tabs, or use a smaller image.`
+              )
+            }
+            if (errorMsg.includes('backend')) {
+              throw new Error(
+                `No compatible backend found. Your browser may not support WebGPU/WebGL.`
+              )
+            }
+          }
+          throw inferenceError
+        }
 
         setState((prev) => ({ ...prev, progress: 80 }))
 
         // Apply mask with controls
-        const resultDataUrl = await applyMask(image, mask, maskControls)
+        const resultDataUrl = await applyMask(originalImageRef.current, mask, maskControls)
 
         // Visualize mask (for debugging/preview)
         const maskViz = visualizeMask(mask)
@@ -190,13 +210,11 @@ export function useBackgroundRemover(): BackgroundRemovalState & BackgroundRemov
     setMaskControls((prev) => ({ ...prev, ...controls }))
 
     // Reapply mask if we have results
-    if (originalImageRef.current && state.resultImage) {
+    if (originalImageRef.current && state.resultImage && currentFileRef.current) {
       // Trigger reprocessing with new controls
-      if (currentFileRef.current) {
-        removeBackground(currentFileRef.current)
-      }
+      removeBackground(currentFileRef.current)
     }
-  }, [state.resultImage, removeBackground])
+  }, [state.resultImage, removeBackground, currentFileRef])
 
   const reset = useCallback(() => {
     originalImageRef.current = null

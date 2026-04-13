@@ -7,6 +7,7 @@ import { Calculator, Play, FunctionSquare, Info } from 'lucide-react'
 import { ScanningLoader } from '@/components/ui/ScanningLoader'
 import { TypingOutput } from '@/components/tools/TypingOutput'
 import { toast } from 'sonner'
+import { logger } from '@/utils/console'
 
 const SCIENTIFIC_KEYS = [
   { label: 'sin', value: 'sin(' }, { label: 'cos', value: 'cos(' }, { label: 'tan', value: 'tan(' }, { label: 'log', value: 'log(' },
@@ -46,13 +47,13 @@ export default function EquationSolverPage() {
     script.src = '/wasm/equation_solver.js'
     script.async = true
     script.onload = async () => {
-        console.log('[WASM] Script loaded, initializing module...')
+        logger.wasm('[WASM] Script loaded, initializing module...')
         try {
             const EquationSolver = (window as any).EquationSolver
             if (typeof EquationSolver === 'function') {
                 const module = await EquationSolver()
                 ;(window as any).EquationSolverModule = module
-                console.log('[WASM] Equation Solver module ready')
+                logger.wasm('[WASM] Equation Solver module ready')
                 setIsWasmReady(true)
             } else {
                 throw new Error('EquationSolver not found on window')

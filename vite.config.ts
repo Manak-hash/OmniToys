@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -66,6 +67,12 @@ export default defineConfig({
         enabled: true
       }
     }),
+    visualizer({
+      filename: './dist/stats.html',
+      open: true,
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
   resolve: {
     alias: {
@@ -74,5 +81,15 @@ export default defineConfig({
   },
   server: {
     host: true,
+    watch: {
+      ignored: [
+        '**/emsdk/**',
+        '**/node_modules/**',
+        '**/.git/**'
+      ]
+    }
+  },
+  optimizeDeps: {
+    exclude: ['onnxruntime-web'],
   },
 });

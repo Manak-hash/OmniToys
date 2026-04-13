@@ -6,6 +6,7 @@ import { ActionToolbar } from '@/components/tools/ActionToolbar'
 import { FileDiff, Split, Code, Info } from 'lucide-react'
 import { ScanningLoader } from '@/components/ui/ScanningLoader'
 import { computeDiff } from '@/utils/diffChecker'
+import { logger } from '@/utils/console'
 
 export default function DiffCheckerPage() {
     const [leftText, setLeftText] = useState('')
@@ -25,13 +26,13 @@ export default function DiffCheckerPage() {
             script.src = '/wasm/diff_checker.js'
             script.async = true
             script.onload = async () => {
-                console.log('[WASM] Diff Checker script loaded, initializing module...')
+                logger.wasm('[WASM] Diff Checker script loaded, initializing module...')
                 try {
                     const DiffChecker = (window as any).DiffChecker
                     if (typeof DiffChecker === 'function') {
                         const module = await DiffChecker()
                         ;(window as any).DiffCheckerModule = module
-                        console.log('[WASM] Diff Checker module ready')
+                        logger.wasm('[WASM] Diff Checker module ready')
                         setIsWasmLoaded(true)
                     } else {
                         throw new Error('DiffChecker not found on window')
@@ -84,7 +85,7 @@ export default function DiffCheckerPage() {
                                     if (prefix === '- ') return { type: 'del' as const, value }
                                     return { type: 'eq' as const, value: line.substring(2) || line }
                                 })
-                            console.log('[WASM] Diff computed successfully')
+                            logger.wasm('[WASM] Diff computed successfully')
                         } else {
                             throw new Error('WASM returned invalid result')
                         }

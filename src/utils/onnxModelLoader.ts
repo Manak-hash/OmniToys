@@ -47,10 +47,10 @@ export const AVAILABLE_MODELS: Record<string, BackgroundRemovalModel> = {
   birefnet: {
     id: 'birefnet',
     name: 'BiRefNet',
-    description: 'Quality model, best for hair and complex edges (172MB)',
+    description: 'Quality model for hair/complex edges (172MB, 1024px)',
     config: {
       // Load from HuggingFace CDN - free, fast, cached by PWA after first load
-      modelUrl: 'https://huggingface.co/schirrmacher/birefnet-general/resolve/main/onnx/model.onnx',
+      modelUrl: 'https://huggingface.co/onnx-community/BiRefNet-ONNX/resolve/main/onnx/model.onnx',
       inputSize: 1024,
       version: '1.0.0',
     },
@@ -100,13 +100,11 @@ export async function loadBackgroundRemovalModel(
 
   // Check if already loaded
   if (sessions.has(modelId)) {
-    console.log(`[ONNX] Model ${model.name} already loaded`)
     activeModelId = modelId
     return sessions.get(modelId)!
   }
 
   try {
-    console.log(`[ONNX] Loading ${model.name} from:`, model.config.modelUrl)
 
     const session = await ort.InferenceSession.create(model.config.modelUrl, {
       executionProviders: ['webgl', 'wasm'],
@@ -116,9 +114,6 @@ export async function loadBackgroundRemovalModel(
     sessions.set(modelId, session)
     activeModelId = modelId
 
-    console.log(`[ONNX] ${model.name} loaded successfully`)
-    console.log('[ONNX] Input names:', session.inputNames)
-    console.log('[ONNX] Output names:', session.outputNames)
 
     return session
   } catch (error) {
@@ -175,7 +170,6 @@ export function releaseModel(modelId: string): void {
   if (session) {
     session.release()
     sessions.delete(modelId)
-    console.log(`[ONNX] Released model ${modelId}`)
 
     if (activeModelId === modelId) {
       activeModelId = null
@@ -187,9 +181,8 @@ export function releaseModel(modelId: string): void {
  * Release all model sessions
  */
 export function releaseAllModels(): void {
-  sessions.forEach((session, modelId) => {
+  sessions.forEach((session) => {
     session.release()
-    console.log(`[ONNX] Released model ${modelId}`)
   })
   sessions.clear()
   activeModelId = null
@@ -210,7 +203,6 @@ export function isModelLoaded(modelId?: string): boolean {
  */
 export async function switchModel(modelId: string): Promise<ort.InferenceSession> {
   if (activeModelId === modelId && sessions.has(modelId)) {
-    console.log(`[ONNX] Model ${modelId} is already active`)
     return sessions.get(modelId)!
   }
 

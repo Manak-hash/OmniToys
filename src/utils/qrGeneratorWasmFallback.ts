@@ -28,8 +28,6 @@ let isInitialized = false
  */
 export async function initQRGenerator(): Promise<void> {
   if (isInitialized) return
-  console.log('[QR Fallback] Using JavaScript fallback (qrcode npm)')
-  console.log('[QR Fallback] For full variant support, compile WASM module')
   isInitialized = true
 }
 
@@ -146,7 +144,6 @@ async function generateBwipBarcode(
     throw new Error(`${QR_VARIANT_INFO[variant].name} is not implemented`)
   }
 
-  console.log(`[QR Fallback] Generating ${QR_VARIANT_INFO[variant].name} via bwip-js for:`, text)
 
   let barcodeSvg: string
   try {
@@ -157,22 +154,12 @@ async function generateBwipBarcode(
       includetext: false,
       rotate: 'N',
     })
-    console.log(`[QR Fallback] ${QR_VARIANT_INFO[variant].name} raw SVG (first 300 chars):`, barcodeSvg.substring(0, 300))
   } catch (e) {
     console.error(`[QR Fallback] bwip-js ${QR_VARIANT_INFO[variant].name} generation failed:`, e)
     throw new Error(`${QR_VARIANT_INFO[variant].name} generation failed: ${e}`)
   }
 
-  // Extract viewBox from bwip-js SVG
-  const viewBoxMatch = barcodeSvg.match(/viewBox="(\d+) (\d+) (\d+) (\d+)"/)
-  let viewBox = '0 0 100 100'
-  if (viewBoxMatch) {
-    viewBox = `0 0 ${viewBoxMatch[3]} ${viewBoxMatch[4]}`
-  }
-
-  console.log(`[QR Fallback] ${QR_VARIANT_INFO[variant].name} viewBox:`, viewBox)
-
-  // Make SVG responsive
+  // Make SVG responsive (viewBox extracted but not needed for responsive design)
   const wrappedSvg = barcodeSvg.replace(
     /<svg/,
     `<svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet"`
