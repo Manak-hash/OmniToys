@@ -99,9 +99,6 @@ const ApiMockPage = lazy(() => import('./pages/tools/ApiMockPage'))
 const GitCheatPage = lazy(() => import('./pages/tools/GitCheatPage'))
 const BackgroundRemoverPage = lazy(() => import('./pages/tools/BackgroundRemoverPage'))
 
-// OmniFlow Integration
-const OmniFlowPage = lazy(() => import('./pages/tools/OmniFlowPage'))
-
 // Loading fallback component
 function LoadingFallback() {
   return (
@@ -689,15 +686,6 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <BackgroundRemoverPage />
-          </Suspense>
-        ),
-      },
-      // OmniFlow Integration - Special Tool
-      {
-        path: 'tools/omniflow',
-        element: (
-          <Suspense fallback={<LoadingFallback />}>
-            <OmniFlowPage />
           </Suspense>
         ),
       },

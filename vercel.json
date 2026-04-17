@@ -7,11 +7,18 @@
   "rewrites": [
     {
       "source": "/omniflow",
-      "destination": "/omniflow/index.html"
+      "destination": "https://omniflow-two.vercel.app"
     },
     {
       "source": "/omniflow/:match*",
-      "destination": "/omniflow/:match*"
+      "destination": "https://omniflow-two.vercel.app/:match*"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/tools/omniflow",
+      "destination": "/omniflow",
+      "permanent": true
     }
   ],
   "headers": [
