@@ -14,13 +14,6 @@
       "destination": "https://omniflow-two.vercel.app/:match*"
     }
   ],
-  "redirects": [
-    {
-      "source": "/tools/omniflow",
-      "destination": "/omniflow",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
