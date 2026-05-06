@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/omniflow",
-      "destination": "https://omniflow-two.vercel.app/omniflow"
+      "destination": "https://omniflow-two.vercel.app/"
     },
     {
       "source": "/omniflow/:match*",
-      "destination": "https://omniflow-two.vercel.app/omniflow/:match*"
+      "destination": "https://omniflow-two.vercel.app/:match*"
     }
   ],
   "headers": [
